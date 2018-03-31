@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+
+class hex{
+	constructor(){
+		this.sides = [null, null, null, null, null, null];
+		this.score = 1;
+		this.piece = null;
+		this.visited = false;
+	}
+}
+
+class piece{
+	constructor(){
+		this.player = null;
+		this.size = 0;
+	}
+}
+
+class player{
+	constructor(){
+		this.energy = 0;
+		this.score = 0;
+	}
+}
+
+var scores = [
+[14, 14, 13, 13, 13, 12, 12, 12, 12],
+[17, 16, 16, 14, 14, 13, 13, 13],
+[19, 18, 18, 17, 17],
+[22, 21, 20]
+];
+
+function getScore(hexScore){
+	var scoreIndex = hexScore - 1;
+	while(scoreIndex >= 0){
+		if(scores[scoreIndex].length > 0){
+			return scores[scoreIndex].shift();
+		} else {
+			scoreIndex -= 1;
+		}
+	}
+	return 0;
+}
+
+function grow(currentHex){
+	if(currentHex.piece.size < 3){
+		currentHex.piece.size += 1;
+	} else {
+		var hexScore = currentHex.score;
+		players[currentHex.piece.player].score += getScore(hexScore);
+		currentHex.piece = null;
+	}
+}
+
+var players = [];
+
+players.push(new player());
+
+function absorb(currentHex){
+	var player = null;
+	var potentialEnergy = 0;
+	if(currentHex.piece !== null){
+		player = currentHex.piece.player;
+		if(currentHex.piece.size != 0){
+			potentialEnergy = currentHex.piece.size;
+		}
+		var blockingSide = opositeSide(sunnySide);
+		for(i = 0; i < 3; i++){
+			blockingHex = currentHex.sides[blockingSide];
+			if(blockingHex != null){
+				if(blockingHex.piece != null){
+					if(blockingHex.piece.size > i && blockingHex.piece.size >= potentialEnergy){
+						potentialEnergy = 0;
+					}
+				}
+			} else {
+				break;
+			}
+		}
+	}
+	if(player !== null && potentialEnergy !== 0){
+		players[player].energy += potentialEnergy;
+	}
+}
+
+function opositeSide(side){
+	result = (side + 3);
+	if(result > 5){
+		result = result - 6;
+	}
+	return result;
+}
+
+function join(a, b, aSideNum){
+	var otherNumber = opositeSide(aSideNum);
+	if(a.sides[aSideNum] === null && b.sides[otherNumber] === null){
+		a.sides[aSideNum] = b;
+		b.sides[otherNumber] = a;
+	} else {
+		console.log("Can not join");
+	}
+}
+
+function logIt(currentHex){
+	console.log(currentHex);
+}
+
+var hexCount = 0;
+function countIt(currentHex){
+	hexCount += 1;
+}
+
+var sunnySide = 0;
+
+function traverse(a, callbackFunction){
+	a.visited = true;
+	callbackFunction(a);
+	for(i = 0; i < a.sides.length; i++){
+		if(a.sides[i] !== null && a.sides[i].visited !== true){
+			traverse(a.sides[i], callbackFunction);
+		}
+	}
+}
+
+function clean(a){
+	a.visited = false;
+	for(i = 0; i < a.sides.length; i++){
+		if(a.sides[i] !== null && a.sides[i].visited !== false){
+			clean(a.sides[i]);
+		}
+	}
+}
+
+function addRow(a, counter){
+	for(i = 0; i < counter; i++){
+		var b = new hex();
+		join(a, b, 3);
+		a = b;
+	}
+}
+
+function joinRowSmallBig(rowA, rowB){
+	while(rowA !== null){
+		join(rowA, rowB, 1);
+		rowB = rowB.sides[3];
+		join(rowA, rowB, 2);
+		rowA = rowA.sides[3];
+	}
+}
+
+function joinRowBigSmall(rowA, rowB){
+	while(rowB !== null){
+		join(rowA, rowB, 2);
+		rowA = rowA.sides[3];
+		join(rowA, rowB, 1);
+		rowB = rowB.sides[3];
+	}
+}
+
+var root = new hex();
+addRow(root, 3);
+var newHex = new hex();
+addRow(newHex, 4);
+joinRowSmallBig(root, newHex);
+var newHex2 = new hex();
+addRow(newHex2, 5);
+joinRowSmallBig(newHex, newHex2);
+var newHex3 = new hex();
+addRow(newHex3, 6);
+joinRowSmallBig(newHex2, newHex3);
+var newHex4 = new hex();
+addRow(newHex4, 5);
+joinRowBigSmall(newHex3, newHex4);
+var newHex5 = new hex();
+addRow(newHex5, 4);
+joinRowBigSmall(newHex4, newHex5);
+var newHex6 = new hex();
+addRow(newHex6, 3);
+joinRowBigSmall(newHex5, newHex6);
+
+
+var testPiece = new piece();
+testPiece.player = 0;
+testPiece.size = 0;
+root.piece = testPiece;
+
+var testPiece2 = new piece();
+testPiece2.player = 0;
+testPiece2.size = 3;
+root.sides[3].piece = testPiece2;
+
+var sunnySide = 3;
+traverse(root, absorb);
+clean(root);
+
+function setScore(currentHex){
+	var minDepth = 8;
+	for(sideKey in currentHex.sides){
+		var workingHex = currentHex;
+		var sideCount = 0;
+		while(workingHex != null){
+			workingHex = workingHex.sides[sideKey];
+			sideCount += 1;
+		}
+		if(sideCount < minDepth){
+			minDepth = sideCount;
+		}
+	}
+	currentHex.score = minDepth;
+}
+
+traverse(root, setScore)
+clean(root);
+
+console.log(root);
+
+
+
+</script>
+</body>
+</html>
