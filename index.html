@@ -34,6 +34,39 @@ var scores = [
 [22, 21, 20]
 ];
 
+var sunMoves = 0;
+
+var sunnySide = 0;
+
+var players = [];
+
+function moveSun(){
+	sunnySide += 1;
+	if(sunnySide == 6){
+		sunnySide = 0;
+	}
+	sunMoves += 1;
+}
+
+function finalScore(player){
+	if(players[player] !== null){
+		return player.score + Math.floor(player.energy / 3);
+	} else {
+		return null;
+	}
+}
+
+var countPlayer = 0;
+var playerCount = 0;
+
+function treeCount(currentHex){
+	if(currentHex.piece != null){
+		if(currentHex.piece.player === countPlayer){
+			playerCount += 1;
+		}
+	}
+}
+
 function getScore(hexScore){
 	var scoreIndex = hexScore - 1;
 	while(scoreIndex >= 0){
@@ -56,7 +89,7 @@ function grow(currentHex){
 	}
 }
 
-var players = [];
+
 
 players.push(new player());
 
@@ -114,7 +147,7 @@ function countIt(currentHex){
 	hexCount += 1;
 }
 
-var sunnySide = 0;
+
 
 function traverse(a, callbackFunction){
 	a.visited = true;
@@ -236,9 +269,14 @@ clean(root);
 
 traverse(root, resetRange);
 clean(root);
-console.log(root);
+
+countPlayer = 0;
+playerCount = 0;
+traverse(root, treeCount);
+console.log(playerCount);
 
 
 </script>
+
 </body>
 </html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      <html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+      <title>Pick or select and move polygon on mouse click in html5 canvas - Nibunan</title>
+      </head>
+      <body style="margin: 0px">
+      <script src="extend-canvas.min.js"></script>
+      <script type="text/javascript">
+        function Random(range) {
+            return Math.floor((Math.random() * range) + 1);
+        }
+        var selectedPolygon = null;
+        var previousMouseX = 0;
+        var previousMouseY = 0;
+        var geoport = new Geoport();
+        var context = geoport.Create2dContext();
+        var polygonMouseDown = function (e) {
+            previousMouseX = e.x;
+            previousMouseY = e.y;
+            selectedPolygon = e.sender;
+        }
+        function addHex(x, y, size){
+            var side = 0;
+            var points = [];
+            
+            for (side; side < 8; side++) {
+              points.push(new Point(x + size * Math.cos(side * 2 * Math.PI / 6), y + size * Math.sin(side * 2 * Math.PI / 6)));
+            }
+            
+            var polygon = new Polygon(points);
+            polygon.BorderWidth = 2;
+            polygon.Color = new Color(Random(254) + 1, Random(254) + 1, Random(254) + 1);
+            polygon.FillColor = new Color(Random(254) + 1, Random(254) + 1, Random(254) + 1);
+            polygon.AlphaStroke = Random(254) + 50;
+            polygon.AlphaFill = Random(254) + 50;
+            polygon.mouseDown(polygonMouseDown);
+            context.Add(polygon);
+        }
+        var size = 25;
+        var x = 300;
+        var y = 100;
+        addHex(x, y, size);
+        addHex(x + size * 1.5 * 1, y + size * 1.75 * 1 / 2, size);
+        addHex(x + size * 1.5 * 2, y + size * 1.75 * 2 / 2, size);
+        addHex(x + size * 1.5 * 3, y + size * 1.75 * 3 / 2, size);
+
+        addHex(x + size * 1.5 * -1, y + size * 1.75 * 1 / 2, size);
+        addHex(x + size * 1.5 * -2, y + size * 1.75 * 2 / 2, size);
+        addHex(x + size * 1.5 * -3, y + size * 1.75 * 3 / 2, size);
+
+        addHex(x, y + size * 1.75 * 1, size);
+        addHex(x, y + size * 1.75 * 2, size);
+        addHex(x, y + size * 1.75 * 3, size);
+        addHex(x, y + size * 1.75 * 4, size);
+        addHex(x, y + size * 1.75 * 5, size);
+        addHex(x, y + size * 1.75 * 6, size);
+
+        addHex(x + size * 1.5 * 1, y + size * 1.75 * 3 / 2, size);
+        addHex(x + size * 1.5 * 1, y + size * 1.75 * 5 / 2, size);
+        addHex(x + size * 1.5 * 1, y + size * 1.75 * 7 / 2, size);
+        addHex(x + size * 1.5 * 1, y + size * 1.75 * 9 / 2, size);
+        addHex(x + size * 1.5 * 1, y + size * 1.75 * 11 / 2, size);
+
+        addHex(x + size * 1.5 * 2, y + size * 1.75 * 4 / 2, size);
+        addHex(x + size * 1.5 * 2, y + size * 1.75 * 6 / 2, size);
+        addHex(x + size * 1.5 * 2, y + size * 1.75 * 8 / 2, size);
+        addHex(x + size * 1.5 * 2, y + size * 1.75 * 10 / 2, size);
+
+        addHex(x + size * 1.5 * 3, y + size * 1.75 * 5 / 2, size);
+        addHex(x + size * 1.5 * 3, y + size * 1.75 * 7 / 2, size);
+        addHex(x + size * 1.5 * 3, y + size * 1.75 * 9 / 2, size);
+
+        addHex(x + size * 1.5 * -1, y + size * 1.75 * 3 / 2, size);
+        addHex(x + size * 1.5 * -1, y + size * 1.75 * 5 / 2, size);
+        addHex(x + size * 1.5 * -1, y + size * 1.75 * 7 / 2, size);
+        addHex(x + size * 1.5 * -1, y + size * 1.75 * 9 / 2, size);
+        addHex(x + size * 1.5 * -1, y + size * 1.75 * 11 / 2, size);
+
+        addHex(x + size * 1.5 * -2, y + size * 1.75 * 4 / 2, size);
+        addHex(x + size * 1.5 * -2, y + size * 1.75 * 6 / 2, size);
+        addHex(x + size * 1.5 * -2, y + size * 1.75 * 8 / 2, size);
+        addHex(x + size * 1.5 * -2, y + size * 1.75 * 10 / 2, size);
+
+        addHex(x + size * 1.5 * -3, y + size * 1.75 * 5 / 2, size);
+        addHex(x + size * 1.5 * -3, y + size * 1.75 * 7 / 2, size);
+        addHex(x + size * 1.5 * -3, y + size * 1.75 * 9 / 2, size);
+        
+
+        geoport.AddMouseMoveEvent(function (e) {
+            var diffx = previousMouseX - e.x;
+            var diffy = previousMouseY - e.y;
+            previousMouseX = e.x;
+            previousMouseY = e.y;
+            var loc = new Point();
+            
+            if (selectedPolygon != null) {
+                loc.x = selectedPolygon.Origin.x - diffx;
+                loc.y = selectedPolygon.Origin.y - diffy;
+                selectedPolygon.Move(loc);
+            }
+        });
+        geoport.AddMouseUpEvent(function (e) {
+            selectedPolygon = null;
+        });
+        geoport.initiate();
+    </script>
+    <canvas width="700" height="500">
+      </body>
+      </html>
