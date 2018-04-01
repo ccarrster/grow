@@ -9,6 +9,7 @@ class hex{
 		this.score = 1;
 		this.piece = null;
 		this.visited = false;
+		this.range = null;
 	}
 }
 
@@ -125,6 +126,20 @@ function traverse(a, callbackFunction){
 	}
 }
 
+function range(currentHex){
+	for(i = 0; i < currentHex.sides.length; i++){
+		if(currentHex.sides[i] !== null){
+			if(currentHex.sides[i].range === null){
+				currentHex.sides[i].range = (currentHex.range + 1);
+			}
+		}
+	}
+}
+
+function resetRange(a){
+	a.range = null;
+}
+
 function clean(a){
 	a.visited = false;
 	for(i = 0; i < a.sides.length; i++){
@@ -215,8 +230,13 @@ function setScore(currentHex){
 traverse(root, setScore)
 clean(root);
 
-console.log(root);
+root.range = 0;
+traverse(root, range);
+clean(root);
 
+traverse(root, resetRange);
+clean(root);
+console.log(root);
 
 
 </script>
