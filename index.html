@@ -236,31 +236,6 @@ var newHex6 = new hex();
 addRow(newHex6, 3);
 joinRowBigSmall(newHex5, newHex6);
 
-
-var testPiece = new piece();
-testPiece.player = 0;
-testPiece.size = 0;
-root.piece = testPiece;
-
-var testPiece2 = new piece();
-testPiece2.player = 1;
-testPiece2.size = 1;
-root.sides[3].piece = testPiece2;
-
-var testPiece3 = new piece();
-testPiece3.player = 2;
-testPiece3.size = 2;
-root.sides[3].sides[3].piece = testPiece3;
-
-var testPiece4 = new piece();
-testPiece4.player = 3;
-testPiece4.size = 3;
-root.sides[3].sides[3].sides[3].piece = testPiece4;
-
-var sunnySide = 3;
-traverse(root, absorb);
-clean(root);
-
 function setScore(currentHex){
 	var minDepth = 8;
 	for(sideKey in currentHex.sides){
@@ -291,8 +266,6 @@ countPlayer = 0;
 playerCount = 0;
 traverse(root, treeCount);
 clean(root);
-
-console.log(root);
 
 
 var selectedHex = null;
@@ -428,6 +401,8 @@ for(rowIndex = 0; rowIndex < 4; rowIndex++){
 	$("#grid").append('<div style="position:absolute;  top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
+
+
 </script>
 <div>
 Player<select id="playerselect">
@@ -436,6 +411,11 @@ Player<select id="playerselect">
 <option value="2">Blue<option>
 <option value="3">Orange<option>
 </select>
+<div id="sundetails"></div>
+<button onclick='moveSun(); $("#sundetails").html("Sunny Side: "+sunnySide+" Sun Moves: "+sunMoves);'>Advance Sun</button>
+<div id="energydetails"></div>
+<button onclick='traverse(root, absorb); clean(root); $("#energydetails").html("<div>Player Red Energy: "+players[0].energy+" Score: "+players[0].score+"</div><div>Player Green Energy: "+players[1].energy+" Score: "+players[1].score+"</div><div>Player Blue Energy: "+players[2].energy+" Score: "+players[2].score+"</div><div>Player Orange Energy: "+players[3].energy+" Score: "+players[3].score+"</div>")'>Absorb Energy</button>
+
 </div>
 
 </body>
