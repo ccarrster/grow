@@ -314,18 +314,19 @@ function selectHex(currentHex){
         previousMouseX = e.x;
         previousMouseY = e.y;
         selectedPolygon = e.sender;
+        selectedPolygon.Color = new Color(255, 0, 0);
         console.log(selectedPolygon);
     }
     function addHex(x, y, size, indexMap){
     	var currentHex = getHexByIndexMap(indexMap);
-    	
+
         var side = 0;
         var points = [];
-        
-        for (side; side < 8; side++) {
+
+        for (side; side < 6; side++) {
           points.push(new Point(x + size * Math.cos(side * 2 * Math.PI / 6), y + size * Math.sin(side * 2 * Math.PI / 6)));
         }
-        
+
         var polygon = new Polygon(points);
         polygon.BorderWidth = 2;
         polygon.Color = new Color(150, 150, 0);
@@ -344,54 +345,60 @@ function selectHex(currentHex){
         polygon.indexMap = indexMap;
         context.Add(polygon);
     }
-    var size = 25;
-    var x = 300;
+    var size = 50;
+    var x = 350;
     var y = 100;
     var indexMapCounter = 0;
-    
-    addHex(x + size * 1.5 * 3, y + size * 1.75 * 3 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 3, y + size * 1.75 * 5 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 3, y + size * 1.75 * 7 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 3, y + size * 1.75 * 9 / 2, size, indexMapCounter++);
 
-    addHex(x + size * 1.5 * 2, y + size * 1.75 * 2 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 2, y + size * 1.75 * 4 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 2, y + size * 1.75 * 6 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 2, y + size * 1.75 * 8 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 2, y + size * 1.75 * 10 / 2, size, indexMapCounter++);
+    //var xMultiple = 1.5;
+    //var yMultiple = 1.75;
 
-    addHex(x + size * 1.5 * 1, y + size * 1.75 * 1 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 1, y + size * 1.75 * 3 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 1, y + size * 1.75 * 5 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 1, y + size * 1.75 * 7 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 1, y + size * 1.75 * 9 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * 1, y + size * 1.75 * 11 / 2, size, indexMapCounter++);
+    var xMultiple = 1.75;
+    var yMultiple = 2;
+
+    addHex(x + size * xMultiple * 3, y + size * yMultiple * 3 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 3, y + size * yMultiple * 5 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 3, y + size * yMultiple * 7 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 3, y + size * yMultiple * 9 / 2, size, indexMapCounter++);
+
+    addHex(x + size * xMultiple * 2, y + size * yMultiple * 2 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 2, y + size * yMultiple * 4 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 2, y + size * yMultiple * 6 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 2, y + size * yMultiple * 8 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 2, y + size * yMultiple * 10 / 2, size, indexMapCounter++);
+
+    addHex(x + size * xMultiple * 1, y + size * yMultiple * 1 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 1, y + size * yMultiple * 3 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 1, y + size * yMultiple * 5 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 1, y + size * yMultiple * 7 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 1, y + size * yMultiple * 9 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * 1, y + size * yMultiple * 11 / 2, size, indexMapCounter++);
 
     addHex(x, y, size, indexMapCounter++);
-    addHex(x, y + size * 1.75 * 1, size, indexMapCounter++);
-    addHex(x, y + size * 1.75 * 2, size, indexMapCounter++);
-    addHex(x, y + size * 1.75 * 3, size, indexMapCounter++);
-    addHex(x, y + size * 1.75 * 4, size, indexMapCounter++);
-    addHex(x, y + size * 1.75 * 5, size, indexMapCounter++);
-    addHex(x, y + size * 1.75 * 6, size, indexMapCounter++);
+    addHex(x, y + size * yMultiple * 1, size, indexMapCounter++);
+    addHex(x, y + size * yMultiple * 2, size, indexMapCounter++);
+    addHex(x, y + size * yMultiple * 3, size, indexMapCounter++);
+    addHex(x, y + size * yMultiple * 4, size, indexMapCounter++);
+    addHex(x, y + size * yMultiple * 5, size, indexMapCounter++);
+    addHex(x, y + size * yMultiple * 6, size, indexMapCounter++);
 
-    addHex(x + size * 1.5 * -1, y + size * 1.75 * 1 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -1, y + size * 1.75 * 3 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -1, y + size * 1.75 * 5 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -1, y + size * 1.75 * 7 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -1, y + size * 1.75 * 9 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -1, y + size * 1.75 * 11 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -1, y + size * yMultiple * 1 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -1, y + size * yMultiple * 3 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -1, y + size * yMultiple * 5 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -1, y + size * yMultiple * 7 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -1, y + size * yMultiple * 9 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -1, y + size * yMultiple * 11 / 2, size, indexMapCounter++);
 
-    addHex(x + size * 1.5 * -2, y + size * 1.75 * 2 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -2, y + size * 1.75 * 4 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -2, y + size * 1.75 * 6 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -2, y + size * 1.75 * 8 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -2, y + size * 1.75 * 10 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -2, y + size * yMultiple * 2 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -2, y + size * yMultiple * 4 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -2, y + size * yMultiple * 6 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -2, y + size * yMultiple * 8 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -2, y + size * yMultiple * 10 / 2, size, indexMapCounter++);
 
-    addHex(x + size * 1.5 * -3, y + size * 1.75 * 3 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -3, y + size * 1.75 * 5 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -3, y + size * 1.75 * 7 / 2, size, indexMapCounter++);
-    addHex(x + size * 1.5 * -3, y + size * 1.75 * 9 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -3, y + size * yMultiple * 3 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -3, y + size * yMultiple * 5 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -3, y + size * yMultiple * 7 / 2, size, indexMapCounter++);
+    addHex(x + size * xMultiple * -3, y + size * yMultiple * 9 / 2, size, indexMapCounter++);
 
     geoport.AddMouseMoveEvent(function (e) {
         var diffx = previousMouseX - e.x;
@@ -399,12 +406,14 @@ function selectHex(currentHex){
         previousMouseX = e.x;
         previousMouseY = e.y;
         var loc = new Point();
-        
+
+        /*
         if (selectedPolygon != null) {
             loc.x = selectedPolygon.Origin.x - diffx;
             loc.y = selectedPolygon.Origin.y - diffy;
             selectedPolygon.Move(loc);
         }
+        */
     });
     geoport.AddMouseUpEvent(function (e) {
         selectedPolygon = null;
