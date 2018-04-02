@@ -381,6 +381,12 @@ function growIndex(hexIndex){
 	if(currentHex.piece !== null){
 		grow(currentHex);
 		updateImage(hexIndex);
+	} else {
+		var dropPlayer = $("#playerselect").val();
+		var seedPiece = new piece();
+		seedPiece.player = dropPlayer;
+		currentHex.piece = seedPiece;
+		updateImage(hexIndex);
 	}
 }
 
@@ -423,6 +429,14 @@ for(rowIndex = 0; rowIndex < 4; rowIndex++){
 	indexMap += 1;
 }
 </script>
+<div>
+Player<select id="playerselect">
+<option value="0">Red<option>
+<option value="1">Green<option>
+<option value="2">Blue<option>
+<option value="3">Orange<option>
+</select>
+</div>
 
 </body>
 </html>
