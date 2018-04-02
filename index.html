@@ -96,6 +96,9 @@ function grow(currentHex){
 
 
 players.push(new player());
+players.push(new player());
+players.push(new player());
+players.push(new player());
 
 function absorb(currentHex){
 	var player = null;
@@ -240,9 +243,19 @@ testPiece.size = 0;
 root.piece = testPiece;
 
 var testPiece2 = new piece();
-testPiece2.player = 0;
-testPiece2.size = 3;
+testPiece2.player = 1;
+testPiece2.size = 1;
 root.sides[3].piece = testPiece2;
+
+var testPiece3 = new piece();
+testPiece3.player = 2;
+testPiece3.size = 2;
+root.sides[3].sides[3].piece = testPiece3;
+
+var testPiece4 = new piece();
+testPiece4.player = 3;
+testPiece4.size = 3;
+root.sides[3].sides[3].sides[3].piece = testPiece4;
 
 var sunnySide = 3;
 traverse(root, absorb);
@@ -330,38 +343,83 @@ function getHexColor(indexMap){
 	}
 }
 
+function getPieceImage(indexMap){
+	var currentHex = getHexByIndexMap(indexMap);
+	if(currentHex.piece !== null){
+		var size = "";
+		if(currentHex.piece.size == 1){
+			size = "small";
+		} else if(currentHex.piece.size == 2){
+			size = "medium";
+		} else if(currentHex.piece.size == 3){
+			size = "large";
+		} else if(currentHex.piece.size == 0){
+			size = "seed";
+		}
+		var color = "";
+		if(currentHex.piece.player == 0){
+			color = "red";
+		} else if(currentHex.piece.player == 1){
+			color = "green";
+		} else if(currentHex.piece.player == 2){
+			color = "blue";
+		} else if(currentHex.piece.player == 3){
+			color = "orange";
+		}
+		return color + size + ".png";
+	} else {
+		return "blank.png";
+	}
+}
+
+function clickHex(hexIndex){
+	growIndex(hexIndex);
+}
+
+function growIndex(hexIndex){
+	var currentHex = getHexByIndexMap(hexIndex);
+	if(currentHex.piece !== null){
+		grow(currentHex);
+		updateImage(hexIndex);
+	}
+}
+
+function updateImage(hexIndex){
+	$("#hex"+hexIndex).css("background", "url("+getPieceImage(hexIndex)+")");
+}
+
 for(rowIndex = 0; rowIndex < 4; rowIndex++){
-	$("#grid").append('<button id="hex'+(indexMap)+'" style="position:absolute; width:'+size+'px; height:'+size+'px; background-color:'+getHexColor(indexMap)+'; top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px;">');
+	$("#grid").append('<div style="position:absolute;  top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(rowIndex = 0; rowIndex < 5; rowIndex++){
-	$("#grid").append('<button id="hex'+(indexMap)+'" style="position:absolute; width:'+size+'px; height:'+size+'px; background-color:'+getHexColor(indexMap)+'; top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px;">');
+	$("#grid").append('<div style="position:absolute;  top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(rowIndex = 0; rowIndex < 6; rowIndex++){
-	$("#grid").append('<button id="hex'+(indexMap)+'" style="position:absolute; width:'+size+'px; height:'+size+'px; background-color:'+getHexColor(indexMap)+'; top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px;">');
+	$("#grid").append('<div style="position:absolute;  top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(rowIndex = 0; rowIndex < 7; rowIndex++){
-	$("#grid").append('<button id="hex'+(indexMap)+'" style="position:absolute; width:'+size+'px; height:'+size+'px; background-color:'+getHexColor(indexMap)+'; top:'+(startY + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px;">');
+	$("#grid").append('<div style="position:absolute;  top:'+(startY + (offsetY * 0) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(rowIndex = 0; rowIndex < 6; rowIndex++){
-	$("#grid").append('<button id="hex'+(indexMap)+'" style="position:absolute; width:'+size+'px; height:'+size+'px; background-color:'+getHexColor(indexMap)+'; top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px;">');
+	$("#grid").append('<div style="position:absolute;  top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(rowIndex = 0; rowIndex < 5; rowIndex++){
-	$("#grid").append('<button id="hex'+(indexMap)+'" style="position:absolute; width:'+size+'px; height:'+size+'px; background-color:'+getHexColor(indexMap)+'; top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px;">');
+	$("#grid").append('<div style="position:absolute;  top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(rowIndex = 0; rowIndex < 4; rowIndex++){
-	$("#grid").append('<button id="hex'+(indexMap)+'" style="position:absolute; width:'+size+'px; height:'+size+'px; background-color:'+getHexColor(indexMap)+'; top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px;">');
+	$("#grid").append('<div style="position:absolute;  top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 </script>
