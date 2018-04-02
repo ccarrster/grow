@@ -1,7 +1,7 @@
 # grow
 Web version of a board game with growing trees
 
-![GitHub Logo](/grow.png)
+![GitHub Logo](/buttonhex.png)
 
 Completed
 Board Setup
