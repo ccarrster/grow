@@ -32,12 +32,37 @@ class player{
 	}
 }
 
+//TODO use real pieces, just have max limit
+class playerBoard{
+	constructor(){
+		pieces[4, 4, 3, 2];
+	}
+}
+
+//TODO use real pieces
+class activated{
+	constructor(){
+		pieces[4, 4, 1, 0];
+	}
+}
+
 var scores = [
 [14, 14, 13, 13, 13, 12, 12, 12, 12],
 [17, 16, 16, 14, 14, 13, 13, 13],
 [19, 18, 18, 17, 17],
 [22, 21, 20]
 ];
+
+var prices = [
+[1, 1, 2, 2],
+[2, 2, 3, 3],
+[3, 3, 4],
+[4, 5]
+];
+
+var growPrices = [1, 2, 3, 4];
+
+var seedPrice = 1;
 
 var sunMoves = 0;
 
@@ -447,6 +472,10 @@ function clickHex(hexIndex){
 			//move sun(end of game?)
 			//Loop
 		}
+
+		//TODO active area
+		//TODO remove from game if no room
+		//TODO variable costs buy least to most
 	}
 }
 
