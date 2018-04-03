@@ -14,6 +14,7 @@ class hex{
 		this.visited = false;
 		this.range = null;
 		this.indexMap = hexIndex++;
+		this.activated = false;
 	}
 }
 
@@ -84,6 +85,21 @@ function getTreeList(currentHex){
 	}
 }
 
+function getTreeAndSeedList(currentHex){
+	if(currentHex.piece != null){
+		if(currentHex.piece.player === selectedPlayer){
+			treeList.push(currentHex.indexMap);
+		}
+	}
+}
+
+var firstTreeList = null;
+function getFirstTreeList(currentHex){
+	if(currentHex.piece === null && currentHex.score == 1){
+		firstTreeList.push(currentHex.indexMap);
+	}
+}
+
 function getScore(hexScore){
 	var scoreIndex = hexScore - 1;
 	while(scoreIndex >= 0){
@@ -106,13 +122,6 @@ function grow(currentHex){
 	}
 }
 
-
-
-players.push(new player());
-players.push(new player());
-players.push(new player());
-players.push(new player());
-
 function absorb(currentHex){
 	var player = null;
 	var potentialEnergy = 0;
@@ -122,7 +131,7 @@ function absorb(currentHex){
 			potentialEnergy = currentHex.piece.size;
 		}
 		var blockingSide = opositeSide(sunnySide);
-		for(i = 0; i < 3; i++){
+		for(var i = 0; i < 3; i++){
 			blockingHex = currentHex.sides[blockingSide];
 			if(blockingHex != null){
 				if(blockingHex.piece != null){
@@ -167,23 +176,29 @@ function countIt(currentHex){
 	hexCount += 1;
 }
 
-
-
+var traverseCount = 0;
 function traverse(a, callbackFunction){
+	traverseCount += 1;
 	a.visited = true;
 	callbackFunction(a);
-	for(i = 0; i < a.sides.length; i++){
-		if(a.sides[i] !== null && a.sides[i].visited !== true){
-			traverse(a.sides[i], callbackFunction);
+	for(var traverseIndex = 0; traverseIndex < a.sides.length; traverseIndex++){
+		if(a.sides[traverseIndex] !== null && a.sides[traverseIndex].visited !== true){
+			traverse(a.sides[traverseIndex], callbackFunction);
 		}
 	}
 }
 
 function range(currentHex){
-	for(i = 0; i < currentHex.sides.length; i++){
-		if(currentHex.sides[i] !== null){
-			if(currentHex.sides[i].range === null){
-				currentHex.sides[i].range = (currentHex.range + 1);
+	for(var j = 0; j < currentHex.sides.length; j++){
+		if(currentHex.sides[j] !== null){
+			if(currentHex.sides[j].range === null){
+				currentHex.sides[j].range = (currentHex.range + 1);
+				$("#hex"+currentHex.sides[j].indexMap).html((currentHex.range + 1));
+			} else if((currentHex.range + 1) < currentHex.sides[j].range){
+				currentHex.sides[j].range = (currentHex.range + 1);
+				currentHex.visted = false;
+				currentHex.sides[j].visited = false;
+				$("#hex"+currentHex.sides[j].indexMap).html((currentHex.range + 1));
 			}
 		}
 	}
@@ -193,9 +208,17 @@ function resetRange(a){
 	a.range = null;
 }
 
+var rangeMax = null;
+var rangeList = [];
+function getRangeList(currentHex){
+	if(currentHex.range > 0 && currentHex.range <= rangeMax){
+		rangeList.push(currentHex.indexMap);
+	}
+}
+
 function clean(a){
 	a.visited = false;
-	for(i = 0; i < a.sides.length; i++){
+	for(var i = 0; i < a.sides.length; i++){
 		if(a.sides[i] !== null && a.sides[i].visited !== false){
 			clean(a.sides[i]);
 		}
@@ -203,7 +226,7 @@ function clean(a){
 }
 
 function addRow(a, counter){
-	for(i = 0; i < counter; i++){
+	for(var i = 0; i < counter; i++){
 		var b = new hex();
 		join(a, b, 3);
 		a = b;
@@ -251,7 +274,7 @@ joinRowBigSmall(newHex5, newHex6);
 
 function setScore(currentHex){
 	var minDepth = 8;
-	for(sideKey in currentHex.sides){
+	for(var sideKey in currentHex.sides){
 		var workingHex = currentHex;
 		var sideCount = 0;
 		while(workingHex != null){
@@ -268,6 +291,7 @@ function setScore(currentHex){
 traverse(root, setScore)
 clean(root);
 
+/*
 root.range = 0;
 traverse(root, range);
 clean(root);
@@ -279,7 +303,7 @@ countPlayer = 0;
 playerCount = 0;
 traverse(root, treeCount);
 clean(root);
-
+*/
 
 var selectedHex = null;
 var indexMap = null;
@@ -358,59 +382,134 @@ function getPieceImage(indexMap){
 	}
 }
 
+
+var plantSeedFromTree = null;
+
 function clickHex(hexIndex){
-	growIndex(hexIndex);
+	if(selectMode === "grow"){
+		growIndex(hexIndex);
+		$("#grid button").prop('disabled', true);
+		$("#grid div").css("opacity", "0.4");
+		selectMode = "default";
+	} else if(selectMode === "seedTree"){
+		plantSeedFromTree = hexIndex;
+		var seedTreeHex = getHexByIndexMap(hexIndex);
+		selectMode = "plantSeed";
+		seedTreeHex.range = 0;
+		traverse(seedTreeHex, range);
+		clean(root);
+		rangeMax = seedTreeHex.piece.size;
+		rangeList = [];
+		traverse(root, getRangeList);
+		clean(root);
+		$("#grid button").prop('disabled', true);
+		$("#grid div").css("opacity", "0.4");
+		for(var rangeListKey in rangeList){
+			var seedableIndex = rangeList[rangeListKey];
+			var seedPotentialHex = getHexByIndexMap(seedableIndex);
+			if(seedPotentialHex.piece === null){
+				$("#hexwrap"+seedableIndex).css("opacity", "1.0");
+				$("#hex"+seedableIndex).prop('disabled', false);
+			}
+		}
+		traverse(root, resetRange);
+		clean(root);
+	} else if(selectMode === "plantSeed"){
+		plantIndex(hexIndex);
+		$("#grid button").prop('disabled', true);
+		$("#grid div").css("opacity", "0.4");
+		selectMode = "default";
+	} else if(selectMode === "firstTree"){
+		var newTreePiece = new piece();
+		newTreePiece.size = 1;
+		newTreePiece.player = $("#playerselect").val();
+		var seedTreeHex = getHexByIndexMap(hexIndex);
+		seedTreeHex.piece = newTreePiece;
+		updateImage(hexIndex);
+		seedTreeHex.activated = true;
+		$("#grid button").prop('disabled', true);
+		$("#grid div").css("opacity", "0.4");
+		selectMode = "default";
+		if(playerTurnIndex < players.length - 1){
+			playerTurnIndex += 1;
+			$("#playerselect").val(playerTurnIndex);
+			plantFirstTree();
+		} else if(firstTreeLoop === 0) {
+			firstTreeLoop = 1;
+			playerTurnIndex = 0;
+			$("#playerselect").val(playerTurnIndex);
+			plantFirstTree();
+		} else {
+			setAbsorb();
+			//Buy seed/grow/harvest/pass loop (Activated, spend energy)
+			//clear activated
+			//Next players
+			//move sun(end of game?)
+			//Loop
+		}
+	}
 }
+
+var firstTreeLoop = 0;
+
+
 
 function growIndex(hexIndex){
 	var currentHex = getHexByIndexMap(hexIndex);
 	if(currentHex.piece !== null){
 		grow(currentHex);
 		updateImage(hexIndex);
+		currentHex.activated = true;
 	} else {
-		var dropPlayer = $("#playerselect").val();
-		var seedPiece = new piece();
-		seedPiece.player = dropPlayer;
-		currentHex.piece = seedPiece;
-		updateImage(hexIndex);
+		console.log("Can not grow no piece, should not happen.");
 	}
+}
+
+function plantIndex(hexIndex){
+	var currentHex = getHexByIndexMap(hexIndex);
+	var dropPlayer = $("#playerselect").val();
+	var seedPiece = new piece();
+	seedPiece.player = dropPlayer;
+	currentHex.piece = seedPiece;
+	updateImage(hexIndex);
+	currentHex.activated = true;
 }
 
 function updateImage(hexIndex){
 	$("#hex"+hexIndex).css("background", "url("+getPieceImage(hexIndex)+")");
 }
 
-for(rowIndex = 0; rowIndex < 4; rowIndex++){
+for(var rowIndex = 0; rowIndex < 4; rowIndex++){
 	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
-for(rowIndex = 0; rowIndex < 5; rowIndex++){
+for(var rowIndex = 0; rowIndex < 5; rowIndex++){
 	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
-for(rowIndex = 0; rowIndex < 6; rowIndex++){
+for(var rowIndex = 0; rowIndex < 6; rowIndex++){
 	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
-for(rowIndex = 0; rowIndex < 7; rowIndex++){
+for(var rowIndex = 0; rowIndex < 7; rowIndex++){
 	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 0) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
-for(rowIndex = 0; rowIndex < 6; rowIndex++){
+for(var rowIndex = 0; rowIndex < 6; rowIndex++){
 	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
-for(rowIndex = 0; rowIndex < 5; rowIndex++){
+for(var rowIndex = 0; rowIndex < 5; rowIndex++){
 	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
-for(rowIndex = 0; rowIndex < 4; rowIndex++){
+for(var rowIndex = 0; rowIndex < 4; rowIndex++){
 	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
@@ -424,27 +523,101 @@ function selectTreeToSeed(){
 	clean(root);
 	$("#grid button").prop('disabled', true);
 	$("#grid div").css("opacity", "0.4");
-	for(treeListKey in treeList){
+	for(var treeListKey in treeList){
 		var treeIndex = treeList[treeListKey];
-		console.log(treeIndex);
 		$("#hexwrap"+treeIndex).css("opacity", "1.0");
 		$("#hex"+treeIndex).prop('disabled', false);
 	}
 }
 
+function plantFirstTree(){
+	selectMode = "firstTree";
+	$("#grid button").prop('disabled', true);
+	$("#grid div").css("opacity", "0.4");
+	firstTreeList = [];
+	traverse(root, getFirstTreeList);
+	clean(root);
+	for(var firstTreeListKey in firstTreeList){
+		var validFirstTreeIndex = firstTreeList[firstTreeListKey];
+		$("#hexwrap"+validFirstTreeIndex).css("opacity", "1.0");
+		$("#hex"+validFirstTreeIndex).prop('disabled', false);
+	}
+}
+
+function growTrees(){
+	selectMode = "grow";
+	selectedPlayer = $("#playerselect").val();
+	treeList = [];
+	traverse(root, getTreeAndSeedList);
+	clean(root);
+	$("#grid button").prop('disabled', true);
+	$("#grid div").css("opacity", "0.4");
+	for(var treeListKey in treeList){
+		var treeIndex = treeList[treeListKey];
+		$("#hexwrap"+treeIndex).css("opacity", "1.0");
+		$("#hex"+treeIndex).prop('disabled', false);
+	}
+}
+
+var playerTurnIndex = 0;
+
+function start(numPlayers){
+	if(numPlayers >= 1){
+		$("#playerselect").append('<option value="0">Red</option>');
+		players.push(new player());
+	}
+	if(numPlayers >= 2){
+		$("#playerselect").append('<option value="1">Green</option>');
+		players.push(new player());
+	}
+	if(numPlayers >= 3){
+		$("#playerselect").append('<option value="2">Blue</option>');
+		players.push(new player());
+	}
+	if(numPlayers >= 4){
+		$("#playerselect").append('<option value="3">Orange</option>');
+		players.push(new player());
+	}
+	$("#playerselect").val(playerTurnIndex);
+	plantFirstTree();
+}
+
+function setAbsorb(){
+	traverse(root, absorb);
+	clean(root);
+	var energyDetailsString = "";
+	if(players.length >= 1){
+		energyDetailsString += "<div>Player Red Energy: "+players[0].energy+" Score: "+players[0].score+"</div>";
+	}
+	if(players.length >= 2){
+		energyDetailsString += "<div>Player Green Energy: "+players[1].energy+" Score: "+players[1].score+"</div>";
+	}
+	if(players.length >= 3){
+		energyDetailsString += "<div>Player Blue Energy: "+players[2].energy+" Score: "+players[2].score+"</div>";
+	}
+	if(players.length >= 4){
+		energyDetailsString += "<div>Player Orange Energy: "+players[3].energy+" Score: "+players[3].score+"</div>";
+	}
+	$("#energydetails").html(energyDetailsString);
+
+
+
+}
+
 </script>
 <div>
-Player<select id="playerselect">
-<option value="0">Red<option>
-<option value="1">Green<option>
-<option value="2">Blue<option>
-<option value="3">Orange<option>
-</select>
+Player<select id="playerselect"></select>
 <div id="sundetails"></div>
 <button onclick='moveSun(); $("#sundetails").html("Sunny Side: "+sunnySide+" Sun Moves: "+sunMoves);'>Advance Sun</button>
 <div id="energydetails"></div>
 <button onclick='traverse(root, absorb); clean(root); $("#energydetails").html("<div>Player Red Energy: "+players[0].energy+" Score: "+players[0].score+"</div><div>Player Green Energy: "+players[1].energy+" Score: "+players[1].score+"</div><div>Player Blue Energy: "+players[2].energy+" Score: "+players[2].score+"</div><div>Player Orange Energy: "+players[3].energy+" Score: "+players[3].score+"</div>")'>Absorb Energy</button>
 <button onclick='selectTreeToSeed()'>Select Tree to Seed</button>
+<button onclick='plantFirstTree()'>Plant First Tree</button>
+<button onclick='growTrees()'>Grow Trees</button>
+<button onclick='start(4)'>4 Players</button>
+<button onclick='start(3)'>3 Players</button>
+<button onclick='start(2)'>2 Players</button>
+<button onclick='start(1)'>1 Player</button>
 </div>
 
 </body>
