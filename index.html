@@ -19,30 +19,52 @@ class hex{
 }
 
 class piece{
-	constructor(){
-		this.player = null;
-		this.size = 0;
+	constructor(playerIndex, size){
+		this.player = playerIndex;
+		this.size = size;
 	}
 }
 
 class player{
-	constructor(){
+	constructor(playerIndex){
 		this.energy = 0;
 		this.score = 0;
+		this.placeholders = [[], [], [], []];
+		var size = 0;
+		this.placeholders[size].push(new piecePlaceholder(2, new piece(playerIndex, size)));
+		this.placeholders[size].push(new piecePlaceholder(2, new piece(playerIndex, size)));
+		this.placeholders[size].push(new piecePlaceholder(1, new piece(playerIndex, size)));
+		this.placeholders[size].push(new piecePlaceholder(1, new piece(playerIndex, size)));
+		size = 1;
+		this.placeholders[size].push(new piecePlaceholder(3, new piece(playerIndex, size)));
+		this.placeholders[size].push(new piecePlaceholder(3, new piece(playerIndex, size)));
+		this.placeholders[size].push(new piecePlaceholder(2, new piece(playerIndex, size)));
+		this.placeholders[size].push(new piecePlaceholder(2, new piece(playerIndex, size)));
+		size = 2;
+		this.placeholders[size].push(new piecePlaceholder(4, new piece(playerIndex, size)));
+		this.placeholders[size].push(new piecePlaceholder(3, new piece(playerIndex, size)));
+		this.placeholders[size].push(new piecePlaceholder(3, new piece(playerIndex, size)));
+		size = 3;
+		this.placeholders[size].push(new piecePlaceholder(5, new piece(playerIndex, size)));
+		this.placeholders[size].push(new piecePlaceholder(4, new piece(playerIndex, size)));
+		this.activated = [[], [], [], []];
+		size = 0;
+		this.activated[size].push(new piece(playerIndex, size));
+		this.activated[size].push(new piece(playerIndex, size));
+		size = 1;
+		this.activated[size].push(new piece(playerIndex, size));
+		this.activated[size].push(new piece(playerIndex, size));
+		this.activated[size].push(new piece(playerIndex, size));
+		this.activated[size].push(new piece(playerIndex, size));
+		size = 2;
+		this.activated[size].push(new piece(playerIndex, size));
 	}
 }
 
-//TODO use real pieces, just have max limit
-class playerBoard{
-	constructor(){
-		pieces[4, 4, 3, 2];
-	}
-}
-
-//TODO use real pieces
-class activated{
-	constructor(){
-		pieces[4, 4, 1, 0];
+class piecePlaceholder{
+	constructor(cost, piece){
+		this.cost = cost;
+		this.piece = piece;
 	}
 }
 
@@ -51,13 +73,6 @@ var scores = [
 [17, 16, 16, 14, 14, 13, 13, 13],
 [19, 18, 18, 17, 17],
 [22, 21, 20]
-];
-
-var prices = [
-[1, 1, 2, 2],
-[2, 2, 3, 3],
-[3, 3, 4],
-[4, 5]
 ];
 
 var growPrices = [1, 2, 3, 4];
@@ -138,12 +153,22 @@ function getScore(hexScore){
 }
 
 function grow(currentHex){
-	if(currentHex.piece.size < 3){
-		currentHex.piece.size += 1;
-	} else {
+	var piecePlayer = players[currentHex.piece.player];
+	var oldSize = currentHex.piece.size;
+	var placeHolderArray = piecePlayer.placeholders[oldSize];
+	for(var i = 0; i < placeHolderArray.length; i++){
+		if(placeHolderArray[i].piece === null){
+			placeHolderArray[i].piece = currentHex.piece;
+			break;
+		}
+	}
+	currentHex.piece = null;
+	if(oldSize === 3){
 		var hexScore = currentHex.score;
 		players[currentHex.piece.player].score += getScore(hexScore);
-		currentHex.piece = null;
+	} else {
+		var newSize = oldSize + 1;
+		currentHex.piece = piecePlayer.activated[newSize].pop();
 	}
 }
 
@@ -445,9 +470,8 @@ function clickHex(hexIndex){
 		$("#grid div").css("opacity", "0.4");
 		selectMode = "default";
 	} else if(selectMode === "firstTree"){
-		var newTreePiece = new piece();
-		newTreePiece.size = 1;
-		newTreePiece.player = $("#playerselect").val();
+		player = $("#playerselect").val();
+		var newTreePiece = players[player].activated[1].pop();
 		var seedTreeHex = getHexByIndexMap(hexIndex);
 		seedTreeHex.piece = newTreePiece;
 		updateImage(hexIndex);
@@ -473,9 +497,7 @@ function clickHex(hexIndex){
 			//Loop
 		}
 
-		//TODO active area
-		//TODO remove from game if no room
-		//TODO variable costs buy least to most
+		//TODO activated area
 	}
 }
 
@@ -497,8 +519,7 @@ function growIndex(hexIndex){
 function plantIndex(hexIndex){
 	var currentHex = getHexByIndexMap(hexIndex);
 	var dropPlayer = $("#playerselect").val();
-	var seedPiece = new piece();
-	seedPiece.player = dropPlayer;
+	var seedPiece = players[player].activated[0].pop();
 	currentHex.piece = seedPiece;
 	updateImage(hexIndex);
 	currentHex.activated = true;
@@ -593,19 +614,19 @@ var playerTurnIndex = 0;
 function start(numPlayers){
 	if(numPlayers >= 1){
 		$("#playerselect").append('<option value="0">Red</option>');
-		players.push(new player());
+		players.push(new player(0));
 	}
 	if(numPlayers >= 2){
 		$("#playerselect").append('<option value="1">Green</option>');
-		players.push(new player());
+		players.push(new player(1));
 	}
 	if(numPlayers >= 3){
 		$("#playerselect").append('<option value="2">Blue</option>');
-		players.push(new player());
+		players.push(new player(2));
 	}
 	if(numPlayers >= 4){
 		$("#playerselect").append('<option value="3">Orange</option>');
-		players.push(new player());
+		players.push(new player(3));
 	}
 	$("#playerselect").val(playerTurnIndex);
 	plantFirstTree();
@@ -614,23 +635,80 @@ function start(numPlayers){
 function setAbsorb(){
 	traverse(root, absorb);
 	clean(root);
+	updateDisplay();
+}
+
+function countPlaceholders(inPlaceholderArray){
+	var count = 0;
+	for(var i = 0; i < inPlaceholderArray.length; i++){
+		if(inPlaceholderArray[i].piece !== null){
+			count += 1;
+		}
+	}
+	return count;
+}
+
+var countInPlayPlayer;
+var countInPlaySize;
+var countInPlaySum;
+function getCountInPlay(currentHex){
+	if(currentHex.piece !== null){
+		if(currentHex.piece.player === countInPlayPlayer){
+			if(currentHex.piece.size === countInPlaySize){
+				countInPlaySum += 1;
+			}
+		}
+	}
+}
+
+function countInPlay(playerIndex, size){
+	countInPlayPlayer = playerIndex;
+	countInPlaySize = size;
+	countInPlaySum = 0;
+	traverse(root, getCountInPlay);
+	clean(root);
+	return countInPlaySum;
+}
+
+function updateDisplay(){
 	var energyDetailsString = "";
 	if(players.length >= 1){
-		energyDetailsString += "<div>Player Red Energy: "+players[0].energy+" Score: "+players[0].score+"</div>";
+		var playerIndex = 0;
+		energyDetailsString += "<div>Red Energy: "+players[playerIndex].energy+" Score: "+players[playerIndex].score+"</div>";
+		var currentActivated = players[playerIndex].activated;
+		energyDetailsString += "<div>Activated: ("+currentActivated[0].length+" Seeds) ("+currentActivated[1].length+" Small Trees) ("+currentActivated[2].length+" Medium Trees) ("+currentActivated[3].length+" Trees)</div>";
+		var currentPlaceholders = players[playerIndex].placeholders;
+		energyDetailsString += "<div>Placeholders: ("+countPlaceholders(currentPlaceholders[0])+"/"+currentPlaceholders[0].length+" Seeds) ("+countPlaceholders(currentPlaceholders[1])+"/"+currentPlaceholders[1].length+" Small Trees) ("+countPlaceholders(currentPlaceholders[2])+"/"+currentPlaceholders[2].length+" Medium Trees) ("+countPlaceholders(currentPlaceholders[3])+"/"+currentPlaceholders[3].length+" Trees)</div>";
+		energyDetailsString += "<div>In Play: ("+countInPlay(playerIndex, 0)+" Seeds) ("+countInPlay(playerIndex, 1)+" Small Trees) ("+countInPlay(playerIndex, 2)+" Medium Trees) ("+countInPlay(playerIndex, 3)+" Trees)</div>";
 	}
 	if(players.length >= 2){
-		energyDetailsString += "<div>Player Green Energy: "+players[1].energy+" Score: "+players[1].score+"</div>";
+		var playerIndex = 1;
+		energyDetailsString += "<div>Green Energy: "+players[playerIndex].energy+" Score: "+players[playerIndex].score+"</div>";
+		var currentActivated = players[playerIndex].activated;
+		energyDetailsString += "<div>Activated: ("+currentActivated[0].length+" Seeds) ("+currentActivated[1].length+" Small Trees) ("+currentActivated[2].length+" Medium Trees) ("+currentActivated[3].length+" Trees)</div>";
+		var currentPlaceholders = players[playerIndex].placeholders;
+		energyDetailsString += "<div>Placeholders: ("+countPlaceholders(currentPlaceholders[0])+"/"+currentPlaceholders[0].length+" Seeds) ("+countPlaceholders(currentPlaceholders[1])+"/"+currentPlaceholders[1].length+" Small Trees) ("+countPlaceholders(currentPlaceholders[2])+"/"+currentPlaceholders[2].length+" Medium Trees) ("+countPlaceholders(currentPlaceholders[3])+"/"+currentPlaceholders[3].length+" Trees)</div>";
+		energyDetailsString += "<div>In Play: ("+countInPlay(playerIndex, 0)+" Seeds) ("+countInPlay(playerIndex, 1)+" Small Trees) ("+countInPlay(playerIndex, 2)+" Medium Trees) ("+countInPlay(playerIndex, 3)+" Trees)</div>";
 	}
 	if(players.length >= 3){
-		energyDetailsString += "<div>Player Blue Energy: "+players[2].energy+" Score: "+players[2].score+"</div>";
+		var playerIndex = 2;
+		energyDetailsString += "<div>Blue Energy: "+players[playerIndex].energy+" Score: "+players[playerIndex].score+"</div>";
+		var currentActivated = players[playerIndex].activated;
+		energyDetailsString += "<div>Activated: ("+currentActivated[0].length+" Seeds) ("+currentActivated[1].length+" Small Trees) ("+currentActivated[2].length+" Medium Trees) ("+currentActivated[3].length+" Trees)</div>";
+		var currentPlaceholders = players[playerIndex].placeholders;
+		energyDetailsString += "<div>Placeholders: ("+countPlaceholders(currentPlaceholders[0])+"/"+currentPlaceholders[0].length+" Seeds) ("+countPlaceholders(currentPlaceholders[1])+"/"+currentPlaceholders[1].length+" Small Trees) ("+countPlaceholders(currentPlaceholders[2])+"/"+currentPlaceholders[2].length+" Medium Trees) ("+countPlaceholders(currentPlaceholders[3])+"/"+currentPlaceholders[3].length+" Trees)</div>";
+		energyDetailsString += "<div>In Play: ("+countInPlay(playerIndex, 0)+" Seeds) ("+countInPlay(playerIndex, 1)+" Small Trees) ("+countInPlay(playerIndex, 2)+" Medium Trees) ("+countInPlay(playerIndex, 3)+" Trees)</div>";
 	}
 	if(players.length >= 4){
-		energyDetailsString += "<div>Player Orange Energy: "+players[3].energy+" Score: "+players[3].score+"</div>";
+		var playerIndex = 3;
+		energyDetailsString += "<div>Orange Energy: "+players[playerIndex].energy+" Score: "+players[playerIndex].score+"</div>";
+		var currentActivated = players[playerIndex].activated;
+		energyDetailsString += "<div>Activated: ("+currentActivated[0].length+" Seeds) ("+currentActivated[1].length+" Small Trees) ("+currentActivated[2].length+" Medium Trees) ("+currentActivated[3].length+" Trees)</div>";
+		var currentPlaceholders = players[playerIndex].placeholders;
+		energyDetailsString += "<div>Placeholders: ("+countPlaceholders(currentPlaceholders[0])+"/"+currentPlaceholders[0].length+" Seeds) ("+countPlaceholders(currentPlaceholders[1])+"/"+currentPlaceholders[1].length+" Small Trees) ("+countPlaceholders(currentPlaceholders[2])+"/"+currentPlaceholders[2].length+" Medium Trees) ("+countPlaceholders(currentPlaceholders[3])+"/"+currentPlaceholders[3].length+" Trees)</div>";
+		energyDetailsString += "<div>In Play: ("+countInPlay(playerIndex, 0)+" Seeds) ("+countInPlay(playerIndex, 1)+" Small Trees) ("+countInPlay(playerIndex, 2)+" Medium Trees) ("+countInPlay(playerIndex, 3)+" Trees)</div>";
 	}
 	$("#energydetails").html(energyDetailsString);
-
-
-
 }
 
 </script>
