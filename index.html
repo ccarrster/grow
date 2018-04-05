@@ -156,6 +156,7 @@ function grow(currentHex){
 	var piecePlayer = players[currentHex.piece.player];
 	var oldSize = currentHex.piece.size;
 	var newSize = oldSize + 1;
+	var result = false;
 	if(oldSize == 3 || piecePlayer.activated[newSize].length > 0){
 		var placeHolderArray = piecePlayer.placeholders[oldSize];
 		for(var i = 0; i < placeHolderArray.length; i++){
@@ -167,12 +168,14 @@ function grow(currentHex){
 		currentHex.piece = null;
 		if(oldSize === 3){
 			var hexScore = currentHex.score;
-			players[currentHex.piece.player].score += getScore(hexScore);
+			piecePlayer.score += getScore(hexScore);
 		} else {
 			currentHex.piece = piecePlayer.activated[newSize].pop();
 		}
+		result = true;
 	}
 	updateDisplay();
+	return result;
 }
 
 function absorb(currentHex){
@@ -509,9 +512,17 @@ var firstTreeLoop = 0;
 function growIndex(hexIndex){
 	var currentHex = getHexByIndexMap(hexIndex);
 	if(currentHex.piece !== null){
-		grow(currentHex);
-		updateImage(hexIndex);
-		currentHex.activated = true;
+		var growPlayer = players[currentHex.piece.player];
+		var cost = currentHex.piece.size + 1;
+		if(growPlayer.energy >= cost){
+			$result = grow(currentHex);
+			if($result){
+				growPlayer.energy = growPlayer.energy - cost;
+				updateImage(hexIndex);
+				currentHex.activated = true;
+				updateDisplay();
+			}
+		}
 	} else {
 		console.log("Can not grow no piece, should not happen.");
 	}
@@ -524,6 +535,7 @@ function plantIndex(hexIndex){
 	currentHex.piece = seedPiece;
 	updateImage(hexIndex);
 	currentHex.activated = true;
+	players[player].energy =  players[player].energy - 1;
 	updateDisplay();
 }
 
@@ -569,12 +581,14 @@ var selectMode = "grow";
 
 function selectTreeToSeed(){
 	selectedPlayer = parseInt($("#playerselect").val());
+	if(players[selectedPlayer].energy < 1){
+		return;
+	}
 	if(players[selectedPlayer].activated[0].length > 0){
 		selectMode = "seedTree";
 		treeList = [];
 		traverse(root, getTreeList);
 		clean(root);
-		console.log(treeList);
 		$("#grid button").prop('disabled', true);
 		$("#grid div").css("opacity", "0.4");
 		for(var treeListKey in treeList){
@@ -719,7 +733,7 @@ function updateDisplay(){
 
 function removePlaceholderPiece(placeholderArray){
 	var piece = null;
-	for(var i = 0; i < placeholderArray.length; i++){
+	for(var i = placeholderArray.length - 1; i >= 0; i--){
 		if(placeholderArray[i].piece !== null){
 			piece = placeholderArray[i].piece;
 			placeholderArray[i].piece = null;
@@ -729,14 +743,29 @@ function removePlaceholderPiece(placeholderArray){
 	return piece;
 }
 
+function getPlaceholderCost(placeholderArray){
+	var cost = null;
+	for(var i = placeholderArray.length - 1; i >= 0; i--){
+		if(placeholderArray[i].piece !== null){
+			cost = placeholderArray[i].cost;
+			break;
+		}
+	}
+	return cost;
+}
+
 function activate(size){
 	player = parseInt($("#playerselect").val());
 	var activatePlayer = players[player];
 	var currentPlaceholder = activatePlayer.placeholders[size];
-	var piece = removePlaceholderPiece(currentPlaceholder);
-	if(piece !== null){
-		activatePlayer.activated[size].push(piece);
-		updateDisplay();
+	var cost = getPlaceholderCost(currentPlaceholder);
+	if(cost !== null && cost <= activatePlayer.energy){
+		var piece = removePlaceholderPiece(currentPlaceholder);
+		if(piece !== null){
+			activatePlayer.activated[size].push(piece);
+			activatePlayer.energy = activatePlayer.energy - cost;
+			updateDisplay();
+		}
 	}
 }
 
@@ -750,9 +779,9 @@ Player<select id="playerselect"></select>
 <div id="sundetails"></div>
 <button onclick='moveSun(); $("#sundetails").html("Sunny Side: "+sunnySide+" Sun Moves: "+sunMoves);'>Advance Sun</button>
 <div id="energydetails"></div>
-<button onclick='traverse(root, absorb); clean(root); $("#energydetails").html("<div>Player Red Energy: "+players[0].energy+" Score: "+players[0].score+"</div><div>Player Green Energy: "+players[1].energy+" Score: "+players[1].score+"</div><div>Player Blue Energy: "+players[2].energy+" Score: "+players[2].score+"</div><div>Player Orange Energy: "+players[3].energy+" Score: "+players[3].score+"</div>")'>Absorb Energy</button>
+<button onclick='traverse(root, absorb); clean(root); updateDisplay();'>Absorb Energy</button>
 <button onclick='selectTreeToSeed()'>Select Tree to Seed</button>
-<button onclick='growTrees()'>Grow Trees</button>
+<button onclick='growTrees()'>Grow Tree</button>
 <button onclick='start(4)'>4 Players</button>
 <button onclick='start(3)'>3 Players</button>
 <button onclick='start(2)'>2 Players</button>
