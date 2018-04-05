@@ -85,6 +85,10 @@ var sunnySide = 0;
 
 var players = [];
 
+function clearActivated(currentHex){
+	currentHex.activated = false;
+}
+
 function moveSun(){
 	sunnySide += 1;
 	if(sunnySide == 6){
@@ -95,7 +99,7 @@ function moveSun(){
 
 function finalScore(player){
 	if(players[player] !== null){
-		return player.score + Math.floor(player.energy / 3);
+		return players[player].score + Math.floor(players[player].energy / 3);
 	} else {
 		return null;
 	}
@@ -119,7 +123,9 @@ function getTreeList(currentHex){
 	if(currentHex.piece !== null){
 		if(currentHex.piece.player === selectedPlayer){
 			if(currentHex.piece.size > 0){
-				treeList.push(currentHex.indexMap);
+				if(currentHex.activated == false){
+					treeList.push(currentHex.indexMap);
+				}
 			}
 		}
 	}
@@ -128,7 +134,9 @@ function getTreeList(currentHex){
 function getTreeAndSeedList(currentHex){
 	if(currentHex.piece != null){
 		if(currentHex.piece.player === selectedPlayer){
-			treeList.push(currentHex.indexMap);
+			if(currentHex.activated == false){
+				treeList.push(currentHex.indexMap);
+			}
 		}
 	}
 }
@@ -173,6 +181,10 @@ function grow(currentHex){
 			currentHex.piece = piecePlayer.activated[newSize].pop();
 		}
 		result = true;
+	} else {
+		if(oldSize != 3){
+			appendLog("You don't have the right piece activated to grow this tree.");
+		}
 	}
 	updateDisplay();
 	return result;
@@ -202,6 +214,9 @@ function absorb(currentHex){
 	}
 	if(player !== null && potentialEnergy !== 0){
 		players[player].energy += potentialEnergy;
+		if(players[player].energy > 20){
+			players[player].energy = 20;
+		}
 	}
 }
 
@@ -249,12 +264,12 @@ function range(currentHex){
 		if(currentHex.sides[j] !== null){
 			if(currentHex.sides[j].range === null){
 				currentHex.sides[j].range = (currentHex.range + 1);
-				$("#hex"+currentHex.sides[j].indexMap).html((currentHex.range + 1));
+				//$("#hex"+currentHex.sides[j].indexMap).html((currentHex.range + 1));
 			} else if((currentHex.range + 1) < currentHex.sides[j].range){
 				currentHex.sides[j].range = (currentHex.range + 1);
 				currentHex.visted = false;
 				currentHex.sides[j].visited = false;
-				$("#hex"+currentHex.sides[j].indexMap).html((currentHex.range + 1));
+				//$("#hex"+currentHex.sides[j].indexMap).html((currentHex.range + 1));
 			}
 		}
 	}
@@ -347,20 +362,6 @@ function setScore(currentHex){
 traverse(root, setScore)
 clean(root);
 
-/*
-root.range = 0;
-traverse(root, range);
-clean(root);
-
-traverse(root, resetRange);
-clean(root);
-
-countPlayer = 0;
-playerCount = 0;
-traverse(root, treeCount);
-clean(root);
-*/
-
 var selectedHex = null;
 var indexMap = null;
 function getHexByIndexMap(index){
@@ -441,6 +442,8 @@ function getPieceImage(indexMap){
 
 var plantSeedFromTree = null;
 
+var selectedSeedTree = null;
+
 function clickHex(hexIndex){
 	if(selectMode === "grow"){
 		growIndex(hexIndex);
@@ -450,6 +453,8 @@ function clickHex(hexIndex){
 	} else if(selectMode === "seedTree"){
 		plantSeedFromTree = hexIndex;
 		var seedTreeHex = getHexByIndexMap(hexIndex);
+		appendLog(colorForNumber(seedTreeHex.piece.player) +" select the location of the new seed.");
+		selectedSeedTree = seedTreeHex;
 		selectMode = "plantSeed";
 		seedTreeHex.range = 0;
 		traverse(seedTreeHex, range);
@@ -463,7 +468,7 @@ function clickHex(hexIndex){
 		for(var rangeListKey in rangeList){
 			var seedableIndex = rangeList[rangeListKey];
 			var seedPotentialHex = getHexByIndexMap(seedableIndex);
-			if(seedPotentialHex.piece === null){
+			if(seedPotentialHex.piece === null && seedPotentialHex.activated == false){
 				$("#hexwrap"+seedableIndex).css("opacity", "1.0");
 				$("#hex"+seedableIndex).prop('disabled', false);
 			}
@@ -495,15 +500,87 @@ function clickHex(hexIndex){
 			$("#playerselect").val(playerTurnIndex);
 			plantFirstTree();
 		} else {
-			setAbsorb();
-			//Buy seed/grow/harvest/pass loop (Activated, spend energy)
-			//clear activated
-			//Next players
-			//move sun(end of game?)
-			//Loop
+			gameLoop(false);
 		}
+	}
+}
 
-		//TODO activated area
+function gameLoop(isMoveSun){
+	if(isMoveSun){
+		moveSun();
+	}
+	if(sunMoves < 18){
+		drawSunDetails()
+		setAbsorb();
+		$("#playerselect").val(0);
+		performActions();
+	} else {
+		appendLog("The game is over.");
+		$("#actions").hide();
+		for(var i = 0; i < players.length; i++){
+			var score = finalScore(i);
+			appendLog(colorForNumber(i)+" final score is "+score+".");
+			countPlayer = i;
+			playerCount = 0;
+			traverse(root, treeCount);
+			clean(root);
+			appendLog(colorForNumber(i)+" has "+playerCount+" trees and seeds on the board.");
+			players[i].finalScore = score;
+			players[i].finalTreeCount = playerCount;
+		}
+		var highestScore = 0;
+		var highestPlayers = [];
+		var highestCountPlayers = [];
+		var highestCount = 0;
+		for(var i = 0; i < players.length; i++){
+			if(players[i].finalScore > highestScore){
+				highestScore = players[i].finalScore;
+				highestPlayers = [i];
+			} else if(players[i].finalScore == highestScore){
+				highestPlayers.push(i);
+			}
+		}
+		if(highestPlayers.length == 1){
+			appendLog(colorForNumber(highestPlayers[0])+" is the winner.");
+		} else {
+			for(var i = 0; i < highestPlayers.length; i++){
+				if(players[highestPlayers[i]].finalTreeCount > highestCount){
+					highestCount = players[highestPlayers[i]].finalTreeCount;
+					highestCountPlayers = [highestPlayers[i]];
+				} else if(players[highestPlayers[i]].finalTreeCount == highestCount){
+					highestCountPlayers.push(highestPlayers[i]);
+				}
+			}
+			if(highestCountPlayers.length == 1){
+				appendLog(colorForNumber(highestCountPlayers[0])+" is the winner.");
+			} else {
+				appendLog("A tie for the win between the following players:");
+				for(var i = 0; i < highestCountPlayers.length; i++){
+					appendLog(colorForNumber(highestCountPlayers[i]));
+				}
+			}
+		}
+	}
+}
+
+function performActions(){
+	traverse(root, clearActivated);
+	clean(root);
+	console.log($("#playerselect").val());
+	appendLog(colorForNumber(parseInt($("#playerselect").val()))+" players turn.");
+	$("#actions").show();
+}
+
+function colorForNumber(number){
+	console.log(number);
+	if(number == 0){
+		return "red";
+	} else if(number == 1){
+		return "green";
+	} else if(number == 2){
+		return "blue";
+	} else if(number == 3){
+		return "orange";
 	}
 }
 
@@ -522,6 +599,8 @@ function growIndex(hexIndex){
 				currentHex.activated = true;
 				updateDisplay();
 			}
+		} else {
+			appendLog("Not enough energy.");
 		}
 	} else {
 		console.log("Can not grow no piece, should not happen.");
@@ -531,11 +610,12 @@ function growIndex(hexIndex){
 function plantIndex(hexIndex){
 	var currentHex = getHexByIndexMap(hexIndex);
 	var dropPlayer = parseInt($("#playerselect").val());
-	var seedPiece = players[player].activated[0].pop();
+	var seedPiece = players[dropPlayer].activated[0].pop();
 	currentHex.piece = seedPiece;
+	selectedSeedTree.activated = true;
 	updateImage(hexIndex);
 	currentHex.activated = true;
-	players[player].energy =  players[player].energy - 1;
+	players[dropPlayer].energy =  players[dropPlayer].energy - 1;
 	updateDisplay();
 }
 
@@ -580,13 +660,16 @@ for(var rowIndex = 0; rowIndex < 4; rowIndex++){
 var selectMode = "grow";
 
 function selectTreeToSeed(){
-	selectedPlayer = parseInt($("#playerselect").val());
-	if(players[selectedPlayer].energy < 1){
+	var playerIndex = parseInt($("#playerselect").val());
+	appendLog(colorForNumber(playerIndex) +" select the tree the seed is coming from.");
+	if(players[playerIndex].energy < 1){
+		console.log("Not enough energy");
 		return;
 	}
-	if(players[selectedPlayer].activated[0].length > 0){
+	if(players[playerIndex].activated[0].length > 0){
 		selectMode = "seedTree";
 		treeList = [];
+		selectedPlayer = playerIndex;
 		traverse(root, getTreeList);
 		clean(root);
 		$("#grid button").prop('disabled', true);
@@ -600,6 +683,8 @@ function selectTreeToSeed(){
 }
 
 function plantFirstTree(){
+	var selectedPlayer = parseInt($("#playerselect").val());
+	appendLog(colorForNumber(selectedPlayer) + " place a starting tree.");
 	selectMode = "firstTree";
 	$("#grid button").prop('disabled', true);
 	$("#grid div").css("opacity", "0.4");
@@ -615,7 +700,9 @@ function plantFirstTree(){
 
 function growTrees(){
 	selectMode = "grow";
+	//This global var is used
 	selectedPlayer = parseInt($("#playerselect").val());
+	appendLog(colorForNumber(selectedPlayer) + " select a tree to grow or harvest.");
 	treeList = [];
 	traverse(root, getTreeAndSeedList);
 	clean(root);
@@ -647,8 +734,15 @@ function start(numPlayers){
 		$("#playerselect").append('<option value="3">Orange</option>');
 		players.push(new player(3));
 	}
+	appendLog("\nStarted a game with "+numPlayers+" player(s).");
+	$("#playerbuttons").hide();
 	$("#playerselect").val(playerTurnIndex);
+	$("#playerselect").show();
 	plantFirstTree();
+}
+
+function appendLog(message){
+	$("#gamelog").val($("#gamelog").val() + message +"\n");
 }
 
 function setAbsorb(){
@@ -693,7 +787,7 @@ function updateDisplay(){
 	var energyDetailsString = "";
 	if(players.length >= 1){
 		var playerIndex = 0;
-		var color = "red";
+		var color = colorForNumber(playerIndex);
 		energyDetailsString += "<div>"+color+" Energy: "+players[playerIndex].energy+" Score: "+players[playerIndex].score+"</div>";
 		var currentActivated = players[playerIndex].activated;
 		energyDetailsString += "<div>Activated: ("+currentActivated[0].length+" <img src='"+color+"seed.png' alt='"+color+" seed' title='"+color+" seed'>) ("+currentActivated[1].length+" <img src='"+color+"small.png' alt='"+color+" small tree' title='"+color+" small tree'>) ("+currentActivated[2].length+" <img src='"+color+"medium.png' alt='"+color+" medium tree' title='"+color+" medium tree'>) ("+currentActivated[3].length+" <img src='"+color+"large.png' alt='"+color+" large tree' title='"+color+" large tree'>)</div>";
@@ -703,7 +797,7 @@ function updateDisplay(){
 	}
 	if(players.length >= 2){
 		var playerIndex = 1;
-		var color = "green";
+		var color = colorForNumber(playerIndex);
 		energyDetailsString += "<div>"+color+" Energy: "+players[playerIndex].energy+" Score: "+players[playerIndex].score+"</div>";
 		var currentActivated = players[playerIndex].activated;
 		energyDetailsString += "<div>Activated: ("+currentActivated[0].length+" <img src='"+color+"seed.png' alt='"+color+" seed' title='"+color+" seed'>) ("+currentActivated[1].length+" <img src='"+color+"small.png' alt='"+color+" small tree' title='"+color+" small tree'>) ("+currentActivated[2].length+" <img src='"+color+"medium.png' alt='"+color+" medium tree' title='"+color+" medium tree'>) ("+currentActivated[3].length+" <img src='"+color+"large.png' alt='"+color+" large tree' title='"+color+" large tree'>)</div>";
@@ -712,7 +806,7 @@ function updateDisplay(){
 		energyDetailsString += "<div>In Play: ("+countInPlay(playerIndex, 0)+" <img src='"+color+"seed.png' alt='"+color+" seed' title='"+color+" seed'>) ("+countInPlay(playerIndex, 1)+" <img src='"+color+"small.png' alt='"+color+" small tree' title='"+color+" small tree'>) ("+countInPlay(playerIndex, 2)+" <img src='"+color+"medium.png' alt='"+color+" medium tree' title='"+color+" medium tree'>) ("+countInPlay(playerIndex, 3)+" <img src='"+color+"large.png' alt='"+color+" large tree' title='"+color+" large tree'>)</div>";	}
 	if(players.length >= 3){
 		var playerIndex = 2;
-		var color = "blue";
+		var color = colorForNumber(playerIndex);
 		energyDetailsString += "<div>"+color+" Energy: "+players[playerIndex].energy+" Score: "+players[playerIndex].score+"</div>";
 		var currentActivated = players[playerIndex].activated;
 		energyDetailsString += "<div>Activated: ("+currentActivated[0].length+" <img src='"+color+"seed.png' alt='"+color+" seed' title='"+color+" seed'>) ("+currentActivated[1].length+" <img src='"+color+"small.png' alt='"+color+" small tree' title='"+color+" small tree'>) ("+currentActivated[2].length+" <img src='"+color+"medium.png' alt='"+color+" medium tree' title='"+color+" medium tree'>) ("+currentActivated[3].length+" <img src='"+color+"large.png' alt='"+color+" large tree' title='"+color+" large tree'>)</div>";
@@ -721,7 +815,7 @@ function updateDisplay(){
 		energyDetailsString += "<div>In Play: ("+countInPlay(playerIndex, 0)+" <img src='"+color+"seed.png' alt='"+color+" seed' title='"+color+" seed'>) ("+countInPlay(playerIndex, 1)+" <img src='"+color+"small.png' alt='"+color+" small tree' title='"+color+" small tree'>) ("+countInPlay(playerIndex, 2)+" <img src='"+color+"medium.png' alt='"+color+" medium tree' title='"+color+" medium tree'>) ("+countInPlay(playerIndex, 3)+" <img src='"+color+"large.png' alt='"+color+" large tree' title='"+color+" large tree'>)</div>";	}
 	if(players.length >= 4){
 		var playerIndex = 3;
-		var color = "orange";
+		var color = colorForNumber(playerIndex);
 		energyDetailsString += "<div>"+color+" Energy: "+players[playerIndex].energy+" Score: "+players[playerIndex].score+"</div>";
 		var currentActivated = players[playerIndex].activated;
 		energyDetailsString += "<div>Activated: ("+currentActivated[0].length+" <img src='"+color+"seed.png' alt='"+color+" seed' title='"+color+" seed'>) ("+currentActivated[1].length+" <img src='"+color+"small.png' alt='"+color+" small tree' title='"+color+" small tree'>) ("+currentActivated[2].length+" <img src='"+color+"medium.png' alt='"+color+" medium tree' title='"+color+" medium tree'>) ("+currentActivated[3].length+" <img src='"+color+"large.png' alt='"+color+" large tree' title='"+color+" large tree'>)</div>";
@@ -770,27 +864,54 @@ function activate(size){
 }
 
 function doneTurn(){
-	alert("Not implemented yet");
+	var playerIndex = parseInt($("#playerselect").val());
+	if(playerIndex == players.length - 1){
+		gameLoop(true);
+	} else {
+		$("#playerselect").val(playerIndex + 1);
+		performActions();
+	}
 }
 
+function cancel(){
+	selectMode = "default";
+	$("#grid button").prop('disabled', true);
+	$("#grid div").css("opacity", "0.4");
+}
+
+function drawSunDetails(){
+	$("#sundetails").html("Sunny Side: "+sunnySide+" Sun Moves: "+sunMoves);
+}
+drawSunDetails();
 </script>
 <div>
-Player<select id="playerselect"></select>
-<div id="sundetails"></div>
-<button onclick='moveSun(); $("#sundetails").html("Sunny Side: "+sunnySide+" Sun Moves: "+sunMoves);'>Advance Sun</button>
-<div id="energydetails"></div>
-<button onclick='traverse(root, absorb); clean(root); updateDisplay();'>Absorb Energy</button>
-<button onclick='selectTreeToSeed()'>Select Tree to Seed</button>
-<button onclick='growTrees()'>Grow Tree</button>
+<div id="playerbuttons">
 <button onclick='start(4)'>4 Players</button>
 <button onclick='start(3)'>3 Players</button>
 <button onclick='start(2)'>2 Players</button>
 <button onclick='start(1)'>1 Player</button>
+</div>
+<div style="display:none;">
+Player<select id="playerselect"></select>
+</div>
+<div>
+<div>
+<textarea id="gamelog" style="width:430px; height: 200px;">Select number of players to start a new game.</textarea>
+</div>
+<div id="sundetails"></div>
+<div id="energydetails"></div>
+</div>
+
+<div id="actions" style="display:none;">
+<button onclick='selectTreeToSeed()'>Select Tree to Seed</button>
+<button onclick='growTrees()'>Grow Tree</button>
 <button onclick='activate(0)'>Activate Seed</button>
 <button onclick='activate(1)'>Activate Small Tree</button>
 <button onclick='activate(2)'>Activate Medium Tree</button>
 <button onclick='activate(3)'>Activate Large Tree</button>
 <button onclick='doneTurn()'>Finished Turn</button>
+<button onclick='cancel()'>Cancel</button>
+</div>
 </div>
 
 </body>
