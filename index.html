@@ -889,6 +889,7 @@ function activate(size){
 }
 
 function doneTurn(){
+	cancel();
 	var playerIndex = parseInt($("#playerselect").val());
 	if(playerIndex == players.length - 1){
 		gameLoop(true);
