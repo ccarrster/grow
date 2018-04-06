@@ -882,7 +882,7 @@ function updateDisplay(){
 		energyDetailsString += "<div style='border: 1px solid black;'><div>Placeholders</div>";
 		for(var j = 0; j < 4; j++){
 			var costActivate = activateCost(j, playerIndex);
-			energyDetailsString += "<div class='menuwrapper'><button style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+");' onclick='activate("+j+", "+playerIndex+");'>"+countPlaceholders(currentPlaceholders[0])+"/"+currentPlaceholders[0].length+"</button><span class='buttoncost'>"+costActivate+"</span></div>";
+			energyDetailsString += "<div class='menuwrapper'><button style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+");' onclick='activate("+j+", "+playerIndex+");'>"+countPlaceholders(currentPlaceholders[j])+"/"+currentPlaceholders[j].length+"</button><span class='buttoncost'>"+costActivate+"</span></div>";
 		}
 		energyDetailsString += "</div>";
 		energyDetailsString += "</div>";
