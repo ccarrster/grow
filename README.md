@@ -10,14 +10,16 @@ Completed
 * Energy
 * Shadows
 * Seed distance
-* Some UI
-
-To do
+* Basic UI
 * Sun move next
 * End of game
 * Rounds
 * Prices
-* More UI
 * Hotseat Multiplayer
+
+To do
+* Showing available scores
+* Alternative game modes
+* 2 player scores
 * Web Multiplayer
 * AI
