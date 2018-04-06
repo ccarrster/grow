@@ -577,7 +577,6 @@ function gameLoop(isMoveSun){
 		$("#playerselect").children('option').remove();
 		playerNumber = firstPlayer;
 		for(var i = 0; i < players.length; i++){
-			console.log("Adding " + playerNumber);
 			$("#playerselect").append('<option value="'+playerNumber+'">'+colorForNumber(playerNumber)+'</option>');
 			playerNumber += 1;
 			if(playerNumber == players.length){
@@ -644,7 +643,6 @@ function performActions(){
 }
 
 function colorForNumber(number){
-	console.log(number);
 	if(number == 0){
 		return "red";
 	} else if(number == 1){
@@ -735,7 +733,7 @@ function selectTreeToSeed(){
 	var playerIndex = parseInt($("#playerselect").val());
 	appendLog(colorForNumber(playerIndex) +" select the tree the seed is coming from.");
 	if(players[playerIndex].energy < 1){
-		console.log("Not enough energy");
+		appendLog("Not enough energy.");
 		return;
 	}
 	if(players[playerIndex].activated[0].length > 0){
@@ -817,6 +815,10 @@ function start(numPlayers){
 		$("#playerselect").append('<option value="3">Orange</option>');
 		players.push(new player(3));
 	}
+	if(numPlayers <= 2){
+		scores[3].length = 0;
+	}
+	displayScores();
 	appendLog("\nStarted a game with "+numPlayers+" player(s).");
 	$("#playerbuttons").hide();
 	$("#playerselect").val(playerTurnIndex);
@@ -982,7 +984,10 @@ function drawSunDetails(){
 function displayScores(){
 	var scoreString = "";
 	for(var i = 0; i < scores.length; i++){
-		var score = scores[i][0];
+		var score = "Empty";
+		if(scores[i][0] != null){
+			score = scores[i][0];
+		}
 		scoreString += "<div style='display: inline-block; padding: 10px; background-color: "+getScoreColor(i + 1)+";'>"+score+"</div>";
 	}
 	$("#scores").html(scoreString);
@@ -995,7 +1000,6 @@ drawSunDetails();
 <button onclick='start(4)'>4 Players</button>
 <button onclick='start(3)'>3 Players</button>
 <button onclick='start(2)'>2 Players</button>
-<button onclick='start(1)'>1 Player</button>
 </div>
 <div style="display:none;">
 Player<select id="playerselect"></select>
@@ -1015,7 +1019,6 @@ Player<select id="playerselect"></select>
 <script>
 	$("#grid button").prop('disabled', true);
 	$("#grid div").css("opacity", "0.4");
-	displayScores();
 </script>
 </body>
 </html>
