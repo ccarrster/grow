@@ -639,6 +639,7 @@ function performActions(){
 	clean(root);
 	appendLog(colorForNumber(parseInt($("#playerselect").val()))+" players turn.");
 	$("#actions").show();
+	updateDisplay();
 	enableCurrentPlayerActions();
 }
 
@@ -770,6 +771,28 @@ function plantFirstTree(){
 
 var treeAndSeedSize = 0;
 
+function canSeed(playerIndex){
+	treeList = [];
+	selectedPlayer = playerIndex;
+	traverse(root, getTreeList);
+	clean(root);
+	console.log(treeList);
+	console.log(selectedPlayer);
+	return treeList.length > 0;
+}
+
+function canGrowTrees(size, playerIndex){
+	if(size == -1){
+		return canSeed(playerIndex);
+	}
+	treeList = [];
+	selectedPlayer = playerIndex;
+	treeAndSeedSize = size;
+	traverse(root, getTreeAndSeedList);
+	clean(root);
+	return treeList.length > 0;
+}
+
 function growTrees(size){
 	if(size == -1){
 		selectTreeToSeed();
@@ -888,15 +911,44 @@ function updateDisplay(){
 			} else {
 				var cost = j;
 			}
-			energyDetailsString += "<div class='menuwrapper'><button style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+");' onclick='growTrees("+(j - 1)+");'>"+currentActivated[j].length+"</button><span class='buttoncost'>"+cost+"</span></div>";
+			var buttonClass = "buttoncostenable";
+			if(cost > players[playerIndex].energy){
+				buttonClass = "buttoncostdisable";
+			}
+			if(currentActivated[j].length == 0){
+				buttonClass = "buttoncostdisable";
+			}
+			if(!canGrowTrees(j - 1, playerIndex)){
+				buttonClass = "buttoncostdisable";
+			}
+			energyDetailsString += "<div class='menuwrapper'><button class='"+buttonClass+"' style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+");' onclick='growTrees("+(j - 1)+");'>"+currentActivated[j].length+"</button><span class='buttoncost'>"+cost+"</span></div>";
 		}
-		energyDetailsString += "<div class='menuwrapper'><button style='width:"+size+"px; height:"+size+"px;' onclick='growTrees(3);'>Cut</button><span class='buttoncost'>4</span></div>";
+		cost = 4;
+		var buttonClass = "buttoncostenable";
+		if(cost > players[playerIndex].energy){
+			buttonClass = "buttoncostdisable";
+		}
+		if(!canGrowTrees(3, playerIndex)){
+			buttonClass = "buttoncostdisable";
+		}
+		energyDetailsString += "<div class='menuwrapper'><button class='"+buttonClass+"' style='width:"+size+"px; height:"+size+"px;' onclick='growTrees(3);'>Cut</button><span class='buttoncost'>4</span></div>";
 		energyDetailsString += "</div>";
 		var currentPlaceholders = players[playerIndex].placeholders;
 		energyDetailsString += "<div style='border: 1px solid black;'><div>Placeholders</div>";
 		for(var j = 0; j < 4; j++){
 			var costActivate = activateCost(j, playerIndex);
-			energyDetailsString += "<div class='menuwrapper'><button style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+");' onclick='activate("+j+", "+playerIndex+");'>"+countPlaceholders(currentPlaceholders[j])+"/"+currentPlaceholders[j].length+"</button><span class='buttoncost'>"+costActivate+"</span></div>";
+			var costList = activateCostList(j, playerIndex);
+			var buttonClass = "buttoncostenable";
+			if(costActivate == null || costActivate > players[playerIndex].energy){
+				buttonClass = "buttoncostdisable";
+			}
+			if(costActivate == null){
+				costActivate = "Empty";
+			}
+			if(countPlaceholders(currentPlaceholders[j]) == 0){
+				buttonClass = "buttoncostdisable";
+			}
+			energyDetailsString += "<div class='menuwrapper'><button class='"+buttonClass+"' style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+");' onclick='activate("+j+", "+playerIndex+");' title='"+costList+"'>"+countPlaceholders(currentPlaceholders[j])+"/"+currentPlaceholders[j].length+"</button><span class='buttoncost'>"+costActivate+"</span></div>";
 		}
 		energyDetailsString += "</div>";
 		energyDetailsString += "</div>";
@@ -908,8 +960,8 @@ function updateDisplay(){
 function enableCurrentPlayerActions(){
 	$("#energydetails button").prop('disabled', true);
 	$("#energydetails button").css("opacity", "0.4");
-	$("#board"+parseInt($("#playerselect").val())+" button").prop('disabled', false);
-	$("#board"+parseInt($("#playerselect").val())+" button").css("opacity", "1");
+	$("#board"+parseInt($("#playerselect").val())+" button.buttoncostenable").prop('disabled', false);
+	$("#board"+parseInt($("#playerselect").val())+" button.buttoncostenable").css("opacity", "1");
 }
 
 function removePlaceholderPiece(placeholderArray){
@@ -922,6 +974,25 @@ function removePlaceholderPiece(placeholderArray){
 		}
 	}
 	return piece;
+}
+
+function activateCostList(size, player){
+	var activatePlayer = players[player];
+	var currentPlaceholder = activatePlayer.placeholders[size];
+	return getPlaceholderCostList(currentPlaceholder);
+}
+
+function getPlaceholderCostList(placeholderArray){
+	var costList = "";
+	for(var i = placeholderArray.length - 1; i >= 0; i--){
+		if(placeholderArray[i].piece !== null){
+			if(costList != ""){
+				costList += ", ";
+			}
+			costList += placeholderArray[i].cost;
+		}
+	}
+	return costList;
 }
 
 function getPlaceholderCost(placeholderArray){
@@ -988,7 +1059,14 @@ function displayScores(){
 		if(scores[i][0] != null){
 			score = scores[i][0];
 		}
-		scoreString += "<div style='display: inline-block; padding: 10px; background-color: "+getScoreColor(i + 1)+";'>"+score+"</div>";
+		var scoreTip = "";
+		for(var j = 0; j < scores[i].length; j++){
+			if(scoreTip != ""){
+				scoreTip += ", ";
+			}
+			scoreTip += scores[i][j];
+		}
+		scoreString += "<div style='display: inline-block; padding: 10px; background-color: "+getScoreColor(i + 1)+";' title='"+scoreTip+"'>"+score+"</div>";
 	}
 	$("#scores").html(scoreString);
 }
