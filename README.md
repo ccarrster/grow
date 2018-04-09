@@ -15,11 +15,11 @@ Completed
 * End of game
 * Rounds
 * Prices
+* Showing available scores
+* 2 player scores
 * Hotseat Multiplayer
 
 To do
-* Showing available scores
 * Alternative game modes
-* 2 player scores
 * Web Multiplayer
 * AI
