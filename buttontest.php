@@ -2,16 +2,16 @@
 <html>
 <head>
 	<style>
-		.hexbutton{
-			border-top: 1px solid #000000;
-			border-bottom: 1px solid #000000;
-			border-left: none;
-			border-right: none;
-			outline:none;
-			padding: 0px;
-			display: block;
-			background: url("blank.png");
+		.hex{
+			
 		}
+		.innerhex{
+			
+		}
+		.outerhex{
+			
+		}
+
 	</style>
 	<script>
 		function logIt(index){
@@ -21,9 +21,17 @@
 			var height = 100;
 			var width = height * 0.58;
 			var result = '';
-			result += '<div style="background-color: '+color+'; position: absolute; top:'+y+'px; left:'+x+'px; transform: rotate(60deg);"><button class="hexbutton" style="height: '+height+'px; width: '+width+'px;" onclick="'+callback+'(\''+text+'\');"></button></div>';
-			result += '<div style="background-color: '+color+'; position: absolute; top:'+y+'px; left:'+x+'px; transform: rotate(-60deg);"><button class="hexbutton" style="height: '+height+'px; width: '+width+'px;" onclick="'+callback+'(\''+text+'\');"></button></div>';
-			result += '<div style="background-color: '+color+'; position: absolute; top:'+y+'px; left:'+x+'px;"><button class="hexbutton" style="height: '+height+'px; width: '+width+'px;" onclick="'+callback+'(\''+text+'\');">'+text+'</button></div>';
+			var innerMultiplier = 0.95;
+			var innerHeight = innerMultiplier * height;
+			var innerWidth = innerMultiplier * width;
+			var innerY = y + ((height - height * innerMultiplier) / 2.0);
+			var innerX = x + ((width - width * innerMultiplier) / 2.0);
+			for(i = -60; i <= 60; i += 60){
+				result += '<div class="hex outerhex" style="background-color: black; position: absolute; top:'+y+'px; left:'+x+'px; transform: rotate('+i+'deg); height: '+height+'px; width: '+width+'px;" onclick="'+callback+'(\''+text+'\');"></div>';
+			}
+			for(i = -60; i <= 60; i += 60){
+				result += '<div class="hex innerhex" style="background-color: '+color+'; position: absolute; top:'+innerY+'px; left:'+innerX+'px; transform: rotate('+i+'deg); height: '+innerHeight+'px; width: '+innerWidth+'px;" onclick="'+callback+'(\''+text+'\');"></div>';
+			}
 			return result;
 		}
 	</script>
@@ -34,7 +42,7 @@
 <script>
 	document.getElementById("grid").innerHTML += makeButton(30, 10, 'logIt', 0, 'red', 'Banana');
 	document.getElementById("grid").innerHTML += makeButton(30, 110, 'logIt', 1, 'blue', 'Meat');
-	document.getElementById("grid").innerHTML += makeButton(115, 60, 'logIt', 2, 'green', 'Sandwich');
+	document.getElementById("grid").innerHTML += makeButton(116, 60, 'logIt', 2, 'green', 'Sandwich');
 </script>
 </body>
 </html>

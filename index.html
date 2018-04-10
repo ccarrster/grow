@@ -691,41 +691,42 @@ function plantIndex(hexIndex){
 }
 
 function updateImage(hexIndex){
-	$("#hex"+hexIndex).css("background", "url("+getPieceImage(hexIndex)+")");
+	$("#hex"+hexIndex).css("background", "url("+getPieceImage(hexIndex)+") no-repeat center");
+	$("#hex"+hexIndex).css("background-size", "contain");
 }
 
 for(var rowIndex = 0; rowIndex < 4; rowIndex++){
-	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
+	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+') no-repeat center; background-size: contain;" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(var rowIndex = 0; rowIndex < 5; rowIndex++){
-	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
+	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+') no-repeat center; background-size: contain;" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(var rowIndex = 0; rowIndex < 6; rowIndex++){
-	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
+	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+') no-repeat center; background-size: contain;" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(var rowIndex = 0; rowIndex < 7; rowIndex++){
-	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 0) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
+	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 0) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+') no-repeat center; background-size: contain;" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(var rowIndex = 0; rowIndex < 6; rowIndex++){
-	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
+	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 0.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+') no-repeat center; background-size: contain;" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(var rowIndex = 0; rowIndex < 5; rowIndex++){
-	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
+	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+') no-repeat center; background-size: contain;" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 column += 1;
 for(var rowIndex = 0; rowIndex < 4; rowIndex++){
-	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+');" onclick="clickHex('+(indexMap)+');"></div>');
+	$("#grid").append('<div id="hexwrap'+(indexMap)+'" style="position:absolute;  top:'+(startY + (offsetY * 1.5) + offsetY * rowIndex)+'px; left:'+ (startX + offsetX * column) +'px; width: '+size+'px; height: '+size+'px; background-color:'+getHexColor(indexMap)+';"><button id="hex'+(indexMap)+'" style="width:'+size+'px; height:'+size+'px; background: url('+getPieceImage(indexMap)+') no-repeat center; background-size: contain;" onclick="clickHex('+(indexMap)+');"></div>');
 	indexMap += 1;
 }
 var selectMode = "grow";
@@ -919,7 +920,7 @@ function updateDisplay(){
 			if(!canGrowTrees(j - 1, playerIndex)){
 				buttonClass = "buttoncostdisable";
 			}
-			energyDetailsString += "<div class='menuwrapper'><button class='"+buttonClass+"' style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+");' onclick='growTrees("+(j - 1)+");'>"+currentActivated[j].length+"</button><span class='buttoncost'>"+cost+"</span></div>";
+			energyDetailsString += "<div class='menuwrapper'><button class='"+buttonClass+"' style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+") no-repeat center; background-size: contain;' onclick='growTrees("+(j - 1)+");'>"+currentActivated[j].length+"</button><span class='buttoncost'>"+cost+"</span></div>";
 		}
 		cost = 4;
 		var buttonClass = "buttoncostenable";
@@ -946,7 +947,7 @@ function updateDisplay(){
 			if(countPlaceholders(currentPlaceholders[j]) == 0){
 				buttonClass = "buttoncostdisable";
 			}
-			energyDetailsString += "<div class='menuwrapper'><button class='"+buttonClass+"' style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+");' onclick='activate("+j+", "+playerIndex+");' title='"+costList+"'>"+countPlaceholders(currentPlaceholders[j])+"/"+currentPlaceholders[j].length+"</button><span class='buttoncost'>"+costActivate+"</span></div>";
+			energyDetailsString += "<div class='menuwrapper'><button class='"+buttonClass+"' style='width:"+size+"px; height:"+size+"px; background: url("+getImage(j, playerIndex)+") no-repeat center; background-size: contain;' onclick='activate("+j+", "+playerIndex+");' title='"+costList+"'>"+countPlaceholders(currentPlaceholders[j])+"/"+currentPlaceholders[j].length+"</button><span class='buttoncost'>"+costActivate+"</span></div>";
 		}
 		energyDetailsString += "</div>";
 		energyDetailsString += "</div>";
