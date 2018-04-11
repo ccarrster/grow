@@ -44,6 +44,7 @@ class piece{
 	constructor(playerIndex, size){
 		this.player = playerIndex;
 		this.size = size;
+		this.inShade = null;
 	}
 }
 
@@ -122,20 +123,20 @@ function moveSun(){
 	}
 	sunMoves += 1;
 	$("#grid").css("border-color", "black");
-	if(sunnySide == 0){
+	if(sunnySide == 3){
 		$("#grid").css("border-top-color", "yellow");
-	} else if(sunnySide == 1){
-		$("#grid").css("border-top-color", "yellow");
-		$("#grid").css("border-right-color", "yellow");
-	} else if(sunnySide == 2){
-		$("#grid").css("border-right-color", "yellow");
-		$("#grid").css("border-bottom-color", "yellow");
-	} else if(sunnySide == 3){
-		$("#grid").css("border-bottom-color", "yellow");
 	} else if(sunnySide == 4){
+		$("#grid").css("border-top-color", "yellow");
+		$("#grid").css("border-right-color", "yellow");
+	} else if(sunnySide == 5){
+		$("#grid").css("border-right-color", "yellow");
+		$("#grid").css("border-bottom-color", "yellow");
+	} else if(sunnySide == 0){
+		$("#grid").css("border-bottom-color", "yellow");
+	} else if(sunnySide == 1){
 		$("#grid").css("border-bottom-color", "yellow");
 		$("#grid").css("border-left-color", "yellow");
-	} else if(sunnySide == 5){
+	} else if(sunnySide == 2){
 		$("#grid").css("border-left-color", "yellow");
 		$("#grid").css("border-top-color", "yellow");
 	}
@@ -168,7 +169,9 @@ function getTreeList(currentHex){
 		if(currentHex.piece.player === selectedPlayer){
 			if(currentHex.piece.size > 0){
 				if(currentHex.activated == false){
-					treeList.push(currentHex.indexMap);
+					if(!checkShade || currentHex.piece.inShade == false){
+						treeList.push(currentHex.indexMap);
+					}
 				}
 			}
 		}
@@ -180,7 +183,9 @@ function getTreeAndSeedList(currentHex){
 		if(currentHex.piece.player === selectedPlayer){
 			if(currentHex.activated == false){
 				if(currentHex.piece.size == treeAndSeedSize){
-					treeList.push(currentHex.indexMap);
+					if(!checkShade || currentHex.piece.inShade == false){
+						treeList.push(currentHex.indexMap);
+					}
 				}
 			}
 		}
@@ -264,6 +269,37 @@ function absorb(currentHex){
 		if(players[player].energy > 20){
 			players[player].energy = 20;
 		}
+	}
+}
+
+function willAbsorb(currentHex){
+	var player = null;
+	var potentialEnergy = 0;
+	if(currentHex.piece !== null){
+		player = currentHex.piece.player;
+		if(currentHex.piece.size != 0){
+			potentialEnergy = currentHex.piece.size;
+		} else {
+			potentialEnergy = 1;
+		}
+		var blockingSide = opositeSide(sunnySide);
+		for(var i = 0; i < 3; i++){
+			blockingHex = currentHex.sides[blockingSide];
+			if(blockingHex != null){
+				if(blockingHex.piece != null){
+					if(blockingHex.piece.size > i && blockingHex.piece.size >= potentialEnergy){
+						potentialEnergy = 0;
+						currentHex.piece.inShade = true;
+					}
+				}
+			} else {
+				break;
+			}
+		}
+	}
+	if(player !== null && potentialEnergy !== 0){
+		currentHex.piece.inShade = false;
+		console.log("Not in shade "+player + " " + currentHex.indexMap);
 	}
 }
 
@@ -426,7 +462,7 @@ function selectHex(currentHex){
 
 </script>
 
-<div id="grid" style="position:relative; background-color: black; border: 10px solid black; border-top: 10px solid yellow;">
+<div id="grid" style="position:relative; background-color: black; border: 10px solid black; border-bottom: 10px solid yellow;">
 </div>
 <script>
 var startX = 10;
@@ -502,7 +538,7 @@ function clickHex(hexIndex){
 	if(selectMode === "grow"){
 		growIndex(hexIndex);
 		$("#grid .outerhex").hide();
-		$("#grid div").css("opacity", "0.5");
+		$("#grid .backhex").css("opacity", "0.5");
 		selectMode = "default";
 	} else if(selectMode === "seedTree"){
 		plantSeedFromTree = hexIndex;
@@ -518,7 +554,7 @@ function clickHex(hexIndex){
 		traverse(root, getRangeList);
 		clean(root);
 		$("#grid .outerhex").hide();
-		$("#grid div").css("opacity", "0.5");
+		$("#grid .backhex").css("opacity", "0.5");
 		for(var rangeListKey in rangeList){
 			var seedableIndex = rangeList[rangeListKey];
 			var seedPotentialHex = getHexByIndexMap(seedableIndex);
@@ -533,7 +569,7 @@ function clickHex(hexIndex){
 	} else if(selectMode === "plantSeed"){
 		plantIndex(hexIndex);
 		$("#grid .outerhex").hide();
-		$("#grid div").css("opacity", "0.5");
+		$("#grid .backhex").css("opacity", "0.5");
 		selectMode = "default";
 	} else if(selectMode === "firstTree"){
 		player = parseInt($("#playerselect").val());
@@ -543,7 +579,7 @@ function clickHex(hexIndex){
 		updateImage(hexIndex);
 		seedTreeHex.activated = true;
 		$("#grid .outerhex").hide();
-		$("#grid div").css("opacity", "0.5");
+		$("#grid .backhex").css("opacity", "0.5");
 		selectMode = "default";
 		if(playerTurnIndex < players.length - 1){
 			playerTurnIndex += 1;
@@ -573,7 +609,7 @@ function gameLoop(isMoveSun){
 	if(isMoveSun){
 		moveSun();
 	}
-	if(sunMoves < 18){
+	if(sunMoves < maxSuns){
 		drawSunDetails()
 		setAbsorb();
 		if(isMoveSun){
@@ -593,6 +629,7 @@ function gameLoop(isMoveSun){
 	} else {
 		appendLog("The game is over.");
 		$("#actions").hide();
+		$("#newgame").show();
 		for(var i = 0; i < players.length; i++){
 			var score = finalScore(i);
 			appendLog(colorForNumber(i)+" final score is "+score+".");
@@ -744,7 +781,7 @@ function makeButton(x, y, callback, index, color, text, height, image){
 	var innerWidth = innerMultiplier * width;
 	var innerY = y + ((height - height * innerMultiplier) / 2.0);
 	var innerX = x + ((width - width * innerMultiplier) / 2.0);
-	result += '<div id="hexwrap'+index+'" class="clipboard" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background-color: '+color+';"></div>';
+	result += '<div id="hexwrap'+index+'" class="backhex" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background-color: '+color+';"></div>';
 	result += '<div id="hex'+index+'" class="clipboard" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background: url(\''+image+'\') no-repeat center; background-size: contain;"></div>';
 	for(i = -60; i <= 60; i += 60){
 		result += '<div class="hex outerhex hexclick'+index+'" style="position: absolute; top:'+y+'px; left:'+x+'px; transform: rotate('+i+'deg); height: '+height+'px; width: '+width+'px;" onclick="'+callback+'('+index+');"></div>';
@@ -763,10 +800,13 @@ function selectTreeToSeed(){
 		selectMode = "seedTree";
 		treeList = [];
 		selectedPlayer = playerIndex;
+		if(checkShade){
+			setWillAbsorb();
+		}
 		traverse(root, getTreeList);
 		clean(root);
 		$("#grid .outerhex").hide();
-		$("#grid div").css("opacity", "0.5");
+		$("#grid .backhex").css("opacity", "0.5");
 		for(var treeListKey in treeList){
 			var treeIndex = treeList[treeListKey];
 			$("#hexwrap"+treeIndex).css("opacity", "1.0");
@@ -781,7 +821,7 @@ function plantFirstTree(){
 	appendLog(colorForNumber(selectedPlayer) + " place a starting tree.");
 	selectMode = "firstTree";
 	$("#grid .outerhex").hide();
-	$("#grid div").css("opacity", "0.5");
+	$("#grid .backhex").css("opacity", "0.5");
 	firstTreeList = [];
 	traverse(root, getFirstTreeList);
 	clean(root);
@@ -798,6 +838,9 @@ var treeAndSeedSize = 0;
 function canSeed(playerIndex){
 	treeList = [];
 	selectedPlayer = playerIndex;
+	if(checkShade){
+		setWillAbsorb();
+	}
 	traverse(root, getTreeList);
 	clean(root);
 	return treeList.length > 0;
@@ -810,6 +853,9 @@ function canGrowTrees(size, playerIndex){
 	treeList = [];
 	selectedPlayer = playerIndex;
 	treeAndSeedSize = size;
+	if(checkShade){
+		setWillAbsorb();
+	}
 	traverse(root, getTreeAndSeedList);
 	clean(root);
 	return treeList.length > 0;
@@ -825,10 +871,13 @@ function growTrees(size){
 	selectedPlayer = parseInt($("#playerselect").val());
 	treeList = [];
 	treeAndSeedSize = size;
+	if(checkShade){
+		setWillAbsorb();
+	}
 	traverse(root, getTreeAndSeedList);
 	clean(root);
 	$("#grid .outerhex").hide();
-	$("#grid div").css("opacity", "0.5");
+	$("#grid .backhex").css("opacity", "0.5");
 	for(var treeListKey in treeList){
 		var treeIndex = treeList[treeListKey];
 		$("#hexwrap"+treeIndex).css("opacity", "1.0");
@@ -884,6 +933,11 @@ function setAbsorb(){
 	traverse(root, absorb);
 	clean(root);
 	updateDisplay();
+}
+
+function setWillAbsorb(){
+	traverse(root, willAbsorb);
+	clean(root);
 }
 
 function countPlaceholders(inPlaceholderArray){
@@ -1068,7 +1122,7 @@ function doneTurn(){
 function cancel(){
 	selectMode = "default";
 	$("#grid .outerhex").hide();
-	$("#grid div").css("opacity", "0.5");
+	$("#grid .backhex").css("opacity", "0.5");
 }
 
 function drawSunDetails(){
@@ -1095,12 +1149,45 @@ function displayScores(){
 }
 
 drawSunDetails();
+
+var checkShade = false;
+
+function shadeOptionChange(){
+	if(restrictshade.checked){
+		checkShade = true;
+	} else {
+		checkShade = false;
+	}
+}
+
+var maxSuns = 18;
+function fourSunsOptionChange(){
+	if(foursuns.checked){
+		maxSuns = 24;
+	} else {
+		maxSuns = 18;
+	}
+}
 </script>
 <div>
-<div id="playerbuttons">
-<button onclick='start(4)'>4 Players</button>
-<button onclick='start(3)'>3 Players</button>
-<button onclick='start(2)'>2 Players</button>
+	<div id="playerbuttons">
+		<button onclick='start(4)'>4 Players</button>
+		<button onclick='start(3)'>3 Players</button>
+		<button onclick='start(2)'>2 Players</button>
+		<div style="border:1px solid black;">
+			<div>Optional Modes</div>
+		
+			<div>
+				<input type="checkbox" id="restrictshade" onchange="shadeOptionChange()"> Shaded Tress can not perform actions
+			</div>
+			<div>
+				<input type="checkbox" id="foursuns" onchange="fourSunsOptionChange()"> Four trips of the sun
+			</div>
+		</div>
+	</div>
+	<div id="newgame" style="display:none;">
+		<button onclick='location.reload()'>Start a new game</button>
+	</div>
 </div>
 <div style="display:none;">
 Player<select id="playerselect"></select>
@@ -1119,7 +1206,7 @@ Player<select id="playerselect"></select>
 <div>Feedback <a href="mailto:ccarrster@gmail.com">ccarrster@gmail.com</a> - <a href="https://github.com/ccarrster/grow">https://github.com/ccarrster/grow</a></div>
 <script>
 	$("#grid .outerhex").hide();
-	$("#grid div").css("opacity", "0.5");
+	$("#grid .backhex").css("opacity", "0.5");
 </script>
 </body>
 </html>
