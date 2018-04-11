@@ -478,7 +478,7 @@ function getPieceImage(indexMap){
 }
 
 function getImage(size, player){
-	return colorForNumber(player) + nameForSize(size) + ".png";
+	return  nameForSize(size) + colorForNumber(player) + ".svg";
 }
 
 function nameForSize(size){
@@ -501,7 +501,7 @@ var selectedSeedTree = null;
 function clickHex(hexIndex){
 	if(selectMode === "grow"){
 		growIndex(hexIndex);
-		$("#grid button").prop('disabled', true);
+		$("#grid .outerhex").hide();
 		$("#grid div").css("opacity", "0.5");
 		selectMode = "default";
 	} else if(selectMode === "seedTree"){
@@ -517,7 +517,7 @@ function clickHex(hexIndex){
 		rangeList = [];
 		traverse(root, getRangeList);
 		clean(root);
-		$("#grid button").prop('disabled', true);
+		$("#grid .outerhex").hide();
 		$("#grid div").css("opacity", "0.5");
 		for(var rangeListKey in rangeList){
 			var seedableIndex = rangeList[rangeListKey];
@@ -525,14 +525,14 @@ function clickHex(hexIndex){
 			if(seedPotentialHex.piece === null && seedPotentialHex.activated == false){
 				$("#hexwrap"+seedableIndex).css("opacity", "1.0");
 				$("#hex"+seedableIndex).css("opacity", "1.0");
-				$("#hex"+seedableIndex).prop('disabled', false);
+				$(".hexclick"+seedableIndex).show();
 			}
 		}
 		traverse(root, resetRange);
 		clean(root);
 	} else if(selectMode === "plantSeed"){
 		plantIndex(hexIndex);
-		$("#grid button").prop('disabled', true);
+		$("#grid .outerhex").hide();
 		$("#grid div").css("opacity", "0.5");
 		selectMode = "default";
 	} else if(selectMode === "firstTree"){
@@ -542,7 +542,7 @@ function clickHex(hexIndex){
 		seedTreeHex.piece = newTreePiece;
 		updateImage(hexIndex);
 		seedTreeHex.activated = true;
-		$("#grid button").prop('disabled', true);
+		$("#grid .outerhex").hide();
 		$("#grid div").css("opacity", "0.5");
 		selectMode = "default";
 		if(playerTurnIndex < players.length - 1){
@@ -747,7 +747,7 @@ function makeButton(x, y, callback, index, color, text, height, image){
 	result += '<div id="hexwrap'+index+'" class="clipboard" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background-color: '+color+';"></div>';
 	result += '<div id="hex'+index+'" class="clipboard" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background: url(\''+image+'\') no-repeat center; background-size: contain;"></div>';
 	for(i = -60; i <= 60; i += 60){
-		result += '<div class="hex outerhex" style="position: absolute; top:'+y+'px; left:'+x+'px; transform: rotate('+i+'deg); height: '+height+'px; width: '+width+'px;" onclick="'+callback+'('+index+');"></div>';
+		result += '<div class="hex outerhex hexclick'+index+'" style="position: absolute; top:'+y+'px; left:'+x+'px; transform: rotate('+i+'deg); height: '+height+'px; width: '+width+'px;" onclick="'+callback+'('+index+');"></div>';
 	}
 	return result;
 }
@@ -765,13 +765,13 @@ function selectTreeToSeed(){
 		selectedPlayer = playerIndex;
 		traverse(root, getTreeList);
 		clean(root);
-		$("#grid button").prop('disabled', true);
+		$("#grid .outerhex").hide();
 		$("#grid div").css("opacity", "0.5");
 		for(var treeListKey in treeList){
 			var treeIndex = treeList[treeListKey];
 			$("#hexwrap"+treeIndex).css("opacity", "1.0");
 			$("#hex"+treeIndex).css("opacity", "1.0");
-			$("#hex"+treeIndex).prop('disabled', false);
+			$(".hexclick"+treeIndex).show();
 		}
 	}
 }
@@ -780,7 +780,7 @@ function plantFirstTree(){
 	var selectedPlayer = parseInt($("#playerselect").val());
 	appendLog(colorForNumber(selectedPlayer) + " place a starting tree.");
 	selectMode = "firstTree";
-	$("#grid button").prop('disabled', true);
+	$("#grid .outerhex").hide();
 	$("#grid div").css("opacity", "0.5");
 	firstTreeList = [];
 	traverse(root, getFirstTreeList);
@@ -789,7 +789,7 @@ function plantFirstTree(){
 		var validFirstTreeIndex = firstTreeList[firstTreeListKey];
 		$("#hexwrap"+validFirstTreeIndex).css("opacity", "1.0");
 		$("#hex"+validFirstTreeIndex).css("opacity", "1.0");
-		$("#hex"+validFirstTreeIndex).prop('disabled', false);
+		$(".hexclick"+validFirstTreeIndex).show();
 	}
 }
 
@@ -827,13 +827,13 @@ function growTrees(size){
 	treeAndSeedSize = size;
 	traverse(root, getTreeAndSeedList);
 	clean(root);
-	$("#grid button").prop('disabled', true);
+	$("#grid .outerhex").hide();
 	$("#grid div").css("opacity", "0.5");
 	for(var treeListKey in treeList){
 		var treeIndex = treeList[treeListKey];
 		$("#hexwrap"+treeIndex).css("opacity", "1.0");
 		$("#hex"+treeIndex).css("opacity", "1.0");
-		$("#hex"+treeIndex).prop('disabled', false);
+		$(".hexclick"+treeIndex).show();
 	}
 	if(treeList.length == 0){
 		appendLog(colorForNumber(selectedPlayer) + " no available trees on board to grow/harvest.");
@@ -1067,7 +1067,7 @@ function doneTurn(){
 
 function cancel(){
 	selectMode = "default";
-	$("#grid button").prop('disabled', true);
+	$("#grid .outerhex").hide();
 	$("#grid div").css("opacity", "0.5");
 }
 
@@ -1118,7 +1118,7 @@ Player<select id="playerselect"></select>
 </div>
 <div>Feedback <a href="mailto:ccarrster@gmail.com">ccarrster@gmail.com</a> - <a href="https://github.com/ccarrster/grow">https://github.com/ccarrster/grow</a></div>
 <script>
-	$("#grid button").prop('disabled', true);
+	$("#grid .outerhex").hide();
 	$("#grid div").css("opacity", "0.5");
 </script>
 </body>
