@@ -534,11 +534,21 @@ var plantSeedFromTree = null;
 
 var selectedSeedTree = null;
 
+function disableAll(){
+	$("#grid .outerhex").hide();
+	$("#grid .backhex").css("opacity", "0.5");
+}
+
+function enableOne(index){
+	$("#hexwrap"+index).css("opacity", "1.0");
+	$("#hex"+index).css("opacity", "1.0");
+	$(".hexclick"+index).show();
+}
+
 function clickHex(hexIndex){
 	if(selectMode === "grow"){
 		growIndex(hexIndex);
-		$("#grid .outerhex").hide();
-		$("#grid .backhex").css("opacity", "0.5");
+		disableAll();
 		selectMode = "default";
 	} else if(selectMode === "seedTree"){
 		plantSeedFromTree = hexIndex;
@@ -553,23 +563,19 @@ function clickHex(hexIndex){
 		rangeList = [];
 		traverse(root, getRangeList);
 		clean(root);
-		$("#grid .outerhex").hide();
-		$("#grid .backhex").css("opacity", "0.5");
+		disableAll();
 		for(var rangeListKey in rangeList){
 			var seedableIndex = rangeList[rangeListKey];
 			var seedPotentialHex = getHexByIndexMap(seedableIndex);
 			if(seedPotentialHex.piece === null && seedPotentialHex.activated == false){
-				$("#hexwrap"+seedableIndex).css("opacity", "1.0");
-				$("#hex"+seedableIndex).css("opacity", "1.0");
-				$(".hexclick"+seedableIndex).show();
+				enableOne(seedableIndex);
 			}
 		}
 		traverse(root, resetRange);
 		clean(root);
 	} else if(selectMode === "plantSeed"){
 		plantIndex(hexIndex);
-		$("#grid .outerhex").hide();
-		$("#grid .backhex").css("opacity", "0.5");
+		disableAll();
 		selectMode = "default";
 	} else if(selectMode === "firstTree"){
 		player = parseInt($("#playerselect").val());
@@ -578,8 +584,7 @@ function clickHex(hexIndex){
 		seedTreeHex.piece = newTreePiece;
 		updateImage(hexIndex);
 		seedTreeHex.activated = true;
-		$("#grid .outerhex").hide();
-		$("#grid .backhex").css("opacity", "0.5");
+		disableAll();
 		selectMode = "default";
 		if(playerTurnIndex < players.length - 1){
 			playerTurnIndex += 1;
@@ -805,13 +810,10 @@ function selectTreeToSeed(){
 		}
 		traverse(root, getTreeList);
 		clean(root);
-		$("#grid .outerhex").hide();
-		$("#grid .backhex").css("opacity", "0.5");
+		disableAll();
 		for(var treeListKey in treeList){
 			var treeIndex = treeList[treeListKey];
-			$("#hexwrap"+treeIndex).css("opacity", "1.0");
-			$("#hex"+treeIndex).css("opacity", "1.0");
-			$(".hexclick"+treeIndex).show();
+			enableOne(treeIndex);
 		}
 	}
 }
@@ -820,16 +822,13 @@ function plantFirstTree(){
 	var selectedPlayer = parseInt($("#playerselect").val());
 	appendLog(colorForNumber(selectedPlayer) + " place a starting tree.");
 	selectMode = "firstTree";
-	$("#grid .outerhex").hide();
-	$("#grid .backhex").css("opacity", "0.5");
+	disableAll();
 	firstTreeList = [];
 	traverse(root, getFirstTreeList);
 	clean(root);
 	for(var firstTreeListKey in firstTreeList){
 		var validFirstTreeIndex = firstTreeList[firstTreeListKey];
-		$("#hexwrap"+validFirstTreeIndex).css("opacity", "1.0");
-		$("#hex"+validFirstTreeIndex).css("opacity", "1.0");
-		$(".hexclick"+validFirstTreeIndex).show();
+		enableOne(validFirstTreeIndex);
 	}
 }
 
@@ -876,13 +875,10 @@ function growTrees(size){
 	}
 	traverse(root, getTreeAndSeedList);
 	clean(root);
-	$("#grid .outerhex").hide();
-	$("#grid .backhex").css("opacity", "0.5");
+	disableAll();
 	for(var treeListKey in treeList){
 		var treeIndex = treeList[treeListKey];
-		$("#hexwrap"+treeIndex).css("opacity", "1.0");
-		$("#hex"+treeIndex).css("opacity", "1.0");
-		$(".hexclick"+treeIndex).show();
+		enableOne(treeIndex);
 	}
 	if(treeList.length == 0){
 		appendLog(colorForNumber(selectedPlayer) + " no available trees on board to grow/harvest.");
@@ -1121,8 +1117,7 @@ function doneTurn(){
 
 function cancel(){
 	selectMode = "default";
-	$("#grid .outerhex").hide();
-	$("#grid .backhex").css("opacity", "0.5");
+	disableAll();
 }
 
 function drawSunDetails(){
@@ -1205,8 +1200,7 @@ Player<select id="playerselect"></select>
 </div>
 <div>Feedback <a href="mailto:ccarrster@gmail.com">ccarrster@gmail.com</a> - <a href="https://github.com/ccarrster/grow">https://github.com/ccarrster/grow</a></div>
 <script>
-	$("#grid .outerhex").hide();
-	$("#grid .backhex").css("opacity", "0.5");
+	disableAll();
 </script>
 </body>
 </html>
