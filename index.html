@@ -502,7 +502,7 @@ function clickHex(hexIndex){
 	if(selectMode === "grow"){
 		growIndex(hexIndex);
 		$("#grid button").prop('disabled', true);
-		$("#grid div").css("opacity", "0.7");
+		$("#grid div").css("opacity", "0.5");
 		selectMode = "default";
 	} else if(selectMode === "seedTree"){
 		plantSeedFromTree = hexIndex;
@@ -518,12 +518,12 @@ function clickHex(hexIndex){
 		traverse(root, getRangeList);
 		clean(root);
 		$("#grid button").prop('disabled', true);
-		$("#grid div").css("opacity", "0.7");
+		$("#grid div").css("opacity", "0.5");
 		for(var rangeListKey in rangeList){
 			var seedableIndex = rangeList[rangeListKey];
 			var seedPotentialHex = getHexByIndexMap(seedableIndex);
 			if(seedPotentialHex.piece === null && seedPotentialHex.activated == false){
-				$(".hexwrap"+seedableIndex).css("opacity", "1.0");
+				$("#hexwrap"+seedableIndex).css("opacity", "1.0");
 				$("#hex"+seedableIndex).css("opacity", "1.0");
 				$("#hex"+seedableIndex).prop('disabled', false);
 			}
@@ -533,7 +533,7 @@ function clickHex(hexIndex){
 	} else if(selectMode === "plantSeed"){
 		plantIndex(hexIndex);
 		$("#grid button").prop('disabled', true);
-		$("#grid div").css("opacity", "0.7");
+		$("#grid div").css("opacity", "0.5");
 		selectMode = "default";
 	} else if(selectMode === "firstTree"){
 		player = parseInt($("#playerselect").val());
@@ -543,7 +543,7 @@ function clickHex(hexIndex){
 		updateImage(hexIndex);
 		seedTreeHex.activated = true;
 		$("#grid button").prop('disabled', true);
-		$("#grid div").css("opacity", "0.7");
+		$("#grid div").css("opacity", "0.5");
 		selectMode = "default";
 		if(playerTurnIndex < players.length - 1){
 			playerTurnIndex += 1;
@@ -744,9 +744,7 @@ function makeButton(x, y, callback, index, color, text, height, image){
 	var innerWidth = innerMultiplier * width;
 	var innerY = y + ((height - height * innerMultiplier) / 2.0);
 	var innerX = x + ((width - width * innerMultiplier) / 2.0);
-	for(i = -60; i <= 60; i += 60){
-		result += '<div class="hex outerhex hexwrap'+index+'" style="background-color:'+color+'; position: absolute; top:'+y+'px; left:'+x+'px; transform: rotate('+i+'deg); height: '+height+'px; width: '+width+'px;" onclick="'+callback+'(\''+text+'\');"></div>';
-	}
+	result += '<div id="hexwrap'+index+'" class="clipboard" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background-color: '+color+';"></div>';
 	result += '<div id="hex'+index+'" class="clipboard" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background: url(\''+image+'\') no-repeat center; background-size: contain;"></div>';
 	for(i = -60; i <= 60; i += 60){
 		result += '<div class="hex outerhex" style="position: absolute; top:'+y+'px; left:'+x+'px; transform: rotate('+i+'deg); height: '+height+'px; width: '+width+'px;" onclick="'+callback+'('+index+');"></div>';
@@ -768,10 +766,10 @@ function selectTreeToSeed(){
 		traverse(root, getTreeList);
 		clean(root);
 		$("#grid button").prop('disabled', true);
-		$("#grid div").css("opacity", "0.7");
+		$("#grid div").css("opacity", "0.5");
 		for(var treeListKey in treeList){
 			var treeIndex = treeList[treeListKey];
-			$(".hexwrap"+treeIndex).css("opacity", "1.0");
+			$("#hexwrap"+treeIndex).css("opacity", "1.0");
 			$("#hex"+treeIndex).css("opacity", "1.0");
 			$("#hex"+treeIndex).prop('disabled', false);
 		}
@@ -783,13 +781,13 @@ function plantFirstTree(){
 	appendLog(colorForNumber(selectedPlayer) + " place a starting tree.");
 	selectMode = "firstTree";
 	$("#grid button").prop('disabled', true);
-	$("#grid div").css("opacity", "0.7");
+	$("#grid div").css("opacity", "0.5");
 	firstTreeList = [];
 	traverse(root, getFirstTreeList);
 	clean(root);
 	for(var firstTreeListKey in firstTreeList){
 		var validFirstTreeIndex = firstTreeList[firstTreeListKey];
-		$(".hexwrap"+validFirstTreeIndex).css("opacity", "1.0");
+		$("#hexwrap"+validFirstTreeIndex).css("opacity", "1.0");
 		$("#hex"+validFirstTreeIndex).css("opacity", "1.0");
 		$("#hex"+validFirstTreeIndex).prop('disabled', false);
 	}
@@ -830,10 +828,10 @@ function growTrees(size){
 	traverse(root, getTreeAndSeedList);
 	clean(root);
 	$("#grid button").prop('disabled', true);
-	$("#grid div").css("opacity", "0.7");
+	$("#grid div").css("opacity", "0.5");
 	for(var treeListKey in treeList){
 		var treeIndex = treeList[treeListKey];
-		$(".hexwrap"+treeIndex).css("opacity", "1.0");
+		$("#hexwrap"+treeIndex).css("opacity", "1.0");
 		$("#hex"+treeIndex).css("opacity", "1.0");
 		$("#hex"+treeIndex).prop('disabled', false);
 	}
@@ -984,7 +982,7 @@ function updateDisplay(){
 
 function enableCurrentPlayerActions(){
 	$("#energydetails button").prop('disabled', true);
-	$("#energydetails button").css("opacity", "0.7");
+	$("#energydetails button").css("opacity", "0.5");
 	$("#board"+parseInt($("#playerselect").val())+" button.buttoncostenable").prop('disabled', false);
 	$("#board"+parseInt($("#playerselect").val())+" button.buttoncostenable").css("opacity", "1");
 }
@@ -1070,7 +1068,7 @@ function doneTurn(){
 function cancel(){
 	selectMode = "default";
 	$("#grid button").prop('disabled', true);
-	$("#grid div").css("opacity", "0.7");
+	$("#grid div").css("opacity", "0.5");
 }
 
 function drawSunDetails(){
@@ -1121,7 +1119,7 @@ Player<select id="playerselect"></select>
 <div>Feedback <a href="mailto:ccarrster@gmail.com">ccarrster@gmail.com</a> - <a href="https://github.com/ccarrster/grow">https://github.com/ccarrster/grow</a></div>
 <script>
 	$("#grid button").prop('disabled', true);
-	$("#grid div").css("opacity", "0.7");
+	$("#grid div").css("opacity", "0.5");
 </script>
 </body>
 </html>
