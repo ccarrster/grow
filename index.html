@@ -121,6 +121,10 @@ function clearActivated(currentHex){
 	currentHex.activated = false;
 }
 
+function toggleInstructions(){
+	$("#instructions").toggle();
+}
+
 function moveSun(){
 	sunnySide += 1;
 	if(sunnySide == 6){
@@ -1217,7 +1221,60 @@ Player<select id="playerselect"></select>
 <textarea id="gamelog" style="width:430px; height: 200px;" readonly>Select number of players to start a new game.</textarea>
 </div>
 </div>
-<div>Feedback <a href="mailto:ccarrster@gmail.com">ccarrster@gmail.com</a> - <a href="https://github.com/ccarrster/grow">https://github.com/ccarrster/grow</a></div>
+<div id="instructions" style="display:none; white-space: pre-wrap;">
+	Setup:
+	Select game optional modes
+	Select number of players
+	Take turns placing 1 small tree twice
+
+	Normally the sun moves, but on the first round it does not.
+	When the sun has moved 18 or 24 times with an optional mode, the game is over.
+	- The sun comes from 6 sides of the board.
+	- The winner of the game has the highest score.
+	- Players score an extra 1 point for each 3 energy they have.
+	- If there is a tie, the winner has the most trees and seeds on the board.
+	- If a tie remains, it is a tie for first.
+	Everyone collects energy.
+	- If a tree is not in the shade it gains you energy
+	* 0 for seed
+	* 1 for small tree
+	* 2 for medium tree
+	* 3 for large tree
+	- If another tree is between your tree and the sun and is larger or the same size, your tree may be blocked by a shadow and not gain you energy.
+	* The tree is between you and the sun
+	* The tree is larger or the same size as your tree
+	* The tree is within so many spaces (1 for small, 2 for medium and 3 for large)
+	- Any energy earned over 20 is lost
+
+	The player who takes the first action moves to the next player.
+
+	First player can perform any number of actions
+	- Grow a tree
+	* Select a tree from your Activated section
+	* Select a tree or seed on the board that is one size smaller
+	- Harvest a large tree to score points
+	* Select the Cut button from your Activated section
+	* Select a large tree from the board
+	- Plant a seed
+	* Select a seed from the Activated section
+	* Select a tree from the board
+	* Select an open space to plan the seed (trees can plant seeds at distace: 1 for small, 2 for medium and 3 for large)
+	- Activate a tree or seed
+	* Select a tree or seed from your Placeholder section
+	- End Turn
+	* The next player will perform actions.
+	* When every player has had a turn the cycle starts over again (Sun Move, Absorb Energy, First turn move, Players take actions)
+
+	Actions can be cancelled
+	Unavailable actions are not active
+	Reasons for unavailable actions
+	- Not enough energy
+	- No pieces on the board available
+	- No unactioned pieces on the board available
+	- No pieces in your Activated or Placeholder section
+	- Optional Mode - No pieces available on the board that can see the sun
+</div>
+<div><a href="" onclick="toggleInstructions(); return false;">Instructions</a> - Feedback <a href="mailto:ccarrster@gmail.com">ccarrster@gmail.com</a> - <a href="https://github.com/ccarrster/grow">https://github.com/ccarrster/grow</a></div>
 <script>
 	disableAll();
 </script>
