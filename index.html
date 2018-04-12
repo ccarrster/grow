@@ -21,6 +21,11 @@
 	color: white;
 	text-shadow: 1px 1px #111111;
 }
+#currentTurn, #firstTurn{
+	padding: 10px;
+	background-color: red;
+	display: inline-block;
+}
 </style>
 </head>
 <body>
@@ -622,6 +627,8 @@ function gameLoop(isMoveSun){
 		}
 		$("#playerselect").children('option').remove();
 		playerNumber = firstPlayer;
+		$("#firstTurn").html('First Turn: '+colorForNumber(firstPlayer));
+		$("#firstTurn").css('background-color', colorForNumber(firstPlayer));
 		for(var i = 0; i < players.length; i++){
 			$("#playerselect").append('<option value="'+playerNumber+'">'+colorForNumber(playerNumber)+'</option>');
 			playerNumber += 1;
@@ -685,6 +692,8 @@ function performActions(){
 	traverse(root, clearActivated);
 	clean(root);
 	appendLog(colorForNumber(parseInt($("#playerselect").val()))+" players turn.");
+	$("#currentTurn").html('Current Turn: '+colorForNumber(parseInt($("#playerselect").val())));
+	$("#currentTurn").css('background-color', colorForNumber(parseInt($("#playerselect").val())));
 	$("#actions").show();
 	updateDisplay();
 	enableCurrentPlayerActions();
@@ -821,6 +830,8 @@ function selectTreeToSeed(){
 function plantFirstTree(){
 	var selectedPlayer = parseInt($("#playerselect").val());
 	appendLog(colorForNumber(selectedPlayer) + " place a starting tree.");
+	$("#currentTurn").html('Current Turn: '+colorForNumber(parseInt($("#playerselect").val())));
+	$("#currentTurn").css('background-color', colorForNumber(parseInt($("#playerselect").val())));
 	selectMode = "firstTree";
 	disableAll();
 	firstTreeList = [];
@@ -1140,7 +1151,15 @@ function displayScores(){
 		}
 		scoreString += "<div style='display: inline-block; padding: 10px; background-color: "+getScoreColor(i + 1)+";' title='"+scoreTip+"'>"+score+"</div>";
 	}
+
+	scoreString += '<div id="currentTurn">Current Turn: '+colorForNumber(parseInt($("#playerselect").val()))+'</div>';
+	$("#currentTurn").css('background-color', colorForNumber(parseInt($("#playerselect").val())));
+	scoreString += '<div id="firstTurn">First Turn: '+colorForNumber(firstPlayer)+'</div>';
+	$("#firstTurn").css('background-color', colorForNumber(firstPlayer));
+	console.log($("#playerselect option:first").val());
 	$("#scores").html(scoreString);
+
+
 }
 
 drawSunDetails();
