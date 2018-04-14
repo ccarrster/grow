@@ -42,6 +42,7 @@ class hex{
 		this.range = null;
 		this.indexMap = hexIndex++;
 		this.activated = false;
+		this.inShade = false;
 	}
 }
 
@@ -220,6 +221,30 @@ function getScore(hexScore){
 	return 0;
 }
 
+function hexInShade(currentHex){
+	currentHex.inShade = false;
+	var blockingSide = opositeSide(sunnySide);
+	var blockingHex = currentHex;
+	for(var i = 0; i < 3; i++){
+		if(blockingHex == null){
+			break;
+		}
+		blockingHex = blockingHex.sides[blockingSide];
+		if(blockingHex != null){
+			if(blockingHex.piece != null){
+				if(blockingHex.piece.size >= i + 1){
+					currentHex.inShade = true;
+				}
+			}
+		}
+	}
+	if(currentHex.inShade){
+		$("#innerhexwrap"+currentHex.indexMap).css("opacity", "0.3");
+	} else {
+		$("#innerhexwrap"+currentHex.indexMap).css("opacity", "1.0");
+	}
+}
+
 function grow(currentHex){
 	var piecePlayer = players[currentHex.piece.player];
 	var oldSize = currentHex.piece.size;
@@ -292,13 +317,15 @@ function willAbsorb(currentHex){
 			potentialEnergy = 1;
 		}
 		var blockingSide = opositeSide(sunnySide);
+		blockingHex = currentHex;
 		for(var i = 0; i < 3; i++){
-			blockingHex = currentHex.sides[blockingSide];
+			blockingHex = blockingHex.sides[blockingSide];
 			if(blockingHex != null){
 				if(blockingHex.piece != null){
 					if(blockingHex.piece.size > i && blockingHex.piece.size >= potentialEnergy){
 						potentialEnergy = 0;
 						currentHex.piece.inShade = true;
+						$("#hex"+currentHex.indexMap).css("opacity", "0.3");
 					}
 				}
 			} else {
@@ -308,7 +335,7 @@ function willAbsorb(currentHex){
 	}
 	if(player !== null && potentialEnergy !== 0){
 		currentHex.piece.inShade = false;
-		console.log("Not in shade "+player + " " + currentHex.indexMap);
+		$("#hex"+currentHex.indexMap).css("opacity", "1.0");
 	}
 }
 
@@ -794,12 +821,19 @@ var selectMode = "grow";
 function makeButton(x, y, callback, index, color, text, height, image){
 	var width = height * 0.58;
 	var result = '';
-	var innerMultiplier = 0.95;
+	var borderMultiplier = 0.95;
+	var borderHeight = borderMultiplier * height;
+	var borderWidth = borderMultiplier * width;
+	var borderY = y + ((height - height * borderMultiplier) / 2.0);
+	var borderX = x + ((width - width * borderMultiplier) / 2.0);
+
+	var innerMultiplier = 0.82;
 	var innerHeight = innerMultiplier * height;
 	var innerWidth = innerMultiplier * width;
 	var innerY = y + ((height - height * innerMultiplier) / 2.0);
 	var innerX = x + ((width - width * innerMultiplier) / 2.0);
-	result += '<div id="hexwrap'+index+'" class="backhex" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background-color: '+color+';"></div>';
+	result += '<div id="hexwrap'+index+'" class="backhex" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(borderHeight/Math.cos(Math.radians(30)))+'px; height:'+borderHeight+'px; position: absolute; top:'+borderY+'px; left:'+(borderX - (0.5 * borderWidth))+'px; background-color: #ffffff;"></div>';
+	result += '<div id="innerhexwrap'+index+'" class="innerhex" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background-color: '+color+';"></div>';
 	result += '<div id="hex'+index+'" class="clipboard" style="-webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50);clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width:'+(innerHeight/Math.cos(Math.radians(30)))+'px; height:'+innerHeight+'px; position: absolute; top:'+innerY+'px; left:'+(innerX - (0.5 * innerWidth))+'px; background: url(\''+image+'\') no-repeat center; background-size: contain;"></div>';
 	for(i = -60; i <= 60; i += 60){
 		result += '<div class="hex outerhex hexclick'+index+'" style="position: absolute; top:'+y+'px; left:'+x+'px; transform: rotate('+i+'deg); height: '+height+'px; width: '+width+'px;" onclick="'+callback+'('+index+');"></div>';
@@ -818,9 +852,7 @@ function selectTreeToSeed(){
 		selectMode = "seedTree";
 		treeList = [];
 		selectedPlayer = playerIndex;
-		if(checkShade){
-			setWillAbsorb();
-		}
+		setWillAbsorb();
 		traverse(root, getTreeList);
 		clean(root);
 		disableAll();
@@ -852,9 +884,7 @@ var treeAndSeedSize = 0;
 function canSeed(playerIndex){
 	treeList = [];
 	selectedPlayer = playerIndex;
-	if(checkShade){
-		setWillAbsorb();
-	}
+	setWillAbsorb();
 	traverse(root, getTreeList);
 	clean(root);
 	return treeList.length > 0;
@@ -867,9 +897,7 @@ function canGrowTrees(size, playerIndex){
 	treeList = [];
 	selectedPlayer = playerIndex;
 	treeAndSeedSize = size;
-	if(checkShade){
-		setWillAbsorb();
-	}
+	setWillAbsorb();
 	traverse(root, getTreeAndSeedList);
 	clean(root);
 	return treeList.length > 0;
@@ -885,9 +913,7 @@ function growTrees(size){
 	selectedPlayer = parseInt($("#playerselect").val());
 	treeList = [];
 	treeAndSeedSize = size;
-	if(checkShade){
-		setWillAbsorb();
-	}
+	setWillAbsorb();
 	traverse(root, getTreeAndSeedList);
 	clean(root);
 	disableAll();
@@ -948,6 +974,8 @@ function setAbsorb(){
 
 function setWillAbsorb(){
 	traverse(root, willAbsorb);
+	clean(root);
+	traverse(root, hexInShade);
 	clean(root);
 }
 
