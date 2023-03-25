@@ -285,8 +285,8 @@ function absorb(currentHex){
 			potentialEnergy = currentHex.piece.size;
 		}
 		var blockingSide = opositeSide(sunnySide);
+		blockingHex = currentHex.sides[blockingSide];
 		for(var i = 0; i < 3; i++){
-			blockingHex = currentHex.sides[blockingSide];
 			if(blockingHex != null){
 				if(blockingHex.piece != null){
 					if(blockingHex.piece.size > i && blockingHex.piece.size >= potentialEnergy){
@@ -296,6 +296,7 @@ function absorb(currentHex){
 			} else {
 				break;
 			}
+			blockingHex = blockingHex.sides[blockingSide];
 		}
 	}
 	if(player !== null && potentialEnergy !== 0){
